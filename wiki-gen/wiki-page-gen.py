@@ -499,7 +499,7 @@ class EsSystemConf:
     def createControls(system, rules):
         # Header.
         controlTxt = "===== Controls =====\n\n"
-        controlTxt += f"https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/{system}.png\n"
+        controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n"
         
         return controlTxt        
 
@@ -512,15 +512,15 @@ if __name__ == "__main__":
   # Add available inputs.
   parser.add_argument('-v', '--verbose', help="turn on debug messages", action="store_true" )
   parser.add_argument('system', metavar='<system>', help="The system's shortname, required. If you insert an invalid name you will be shown a list of valid names.")
-  # If you'd like to see how these flags would have worked, check the previous
+  # If you'd like to see how these flags would have worked, check the prototype
   # script iteration. It would be too complicated to implement these options here. Maybe in the future.
   #parser.add_argument('-e', '--emulator', help="specified emulator, when" \
   #" excluded assumes you want all emulators for the system.")
   #parser.add_argument('-c', '--core', help="specified core for the emulator," \
   #" when excluded assumes you want all cores for the specified system and/or" \
   #" emulator.")
-  parser.add_argument('-s', '--systems_yml', help="es_systems.yml definition file")
-  parser.add_argument('-f', '--features_yml', help="es_features.yml definition file")
+  parser.add_argument('-s', '--systems_yml', help="(Optional) Specify a es_systems.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
+  parser.add_argument('-f', '--features_yml', help="(Optional) Specify a es_features.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
   args = parser.parse_args()
 
   # Save the output of the generator to a dictionary to be accessed later.
