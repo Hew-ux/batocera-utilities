@@ -63,16 +63,19 @@ class EsSystemConf:
         # Generate the controls.
         controls = EsSystemConf.createControls(system, es_sys_rules[system]['emulators'])
 
-        return { 'es_systems': es_system , 'es_features': es_feature, 'controls': controls }
+        # Add the troubleshooting template.
+        trouble = EsSystemConf.troubleshooting()
+
+        return { 'es_systems': es_system , 'es_features': es_feature, 'controls': controls, 'troubleshooting': trouble }
 
     # Generate emulator system
     @staticmethod
     def generateSystem(system, rules, verbose):
         listEmulatorsTxt = EsSystemConf.listEmulators(system, rules)
 
-        #pathValue      = EsSystemConf.systemPath(system, rules)
+        pathValue      = EsSystemConf.systemPath(system, rules)
         platformValue  = EsSystemConf.systemPlatform(system, rules)
-        #listExtensions = EsSystemConf.listExtension(rules, False)
+        #listExtensions = EsSystemConf.listExtensionStr(rules, False)
         groupValue     = EsSystemConf.systemGroup(system, rules)
         # This can be per-core, but needs to be deterministically coded later.
         #command        = EsSystemConf.commandName(rules)
@@ -106,6 +109,17 @@ class EsSystemConf:
         systemTxt += "==== Quick reference ====\n\n"
         systemTxt += listEmulatorsTxt
         systemTxt += "\n"
+
+        # Template sections
+        systemTxt += "===== BIOS =====\n\n"
+        systemTxt += "^ MD5 checksum ^ Share file path ^ Description ^\n"
+        # Here is where you'll code in the BIOS list.
+        systemTxt += "\n"
+
+        systemTxt += "===== ROMs =====\n\n"
+        systemTxt += f"Place your {system} ROMs in ''{pathValue}''.\n"
+        systemTxt += "\n"
+
         return systemTxt
 
     # Returns the path to the rom folder for the emulator
@@ -161,32 +175,6 @@ class EsSystemConf:
           return data["command"]
         return EsSystemConf.default_command
 
-    # Creates an _info.txt file inside the emulators folders in roms with the information of the supported extensions.
-    # This is unneccessary for wiki-gen, but will keep (for now).
-    @staticmethod
-    def infoSystem(system, data, romsdir):
-        subdir = EsSystemConf.systemSubRomsDir(system, data)
-
-        # nothing to create
-        if subdir is None:
-            return
-
-        infoTxt = "## SYSTEM %s ##\n" % (data["name"].upper())
-        infoTxt += "-------------------------------------------------------------------------------\n"
-        infoTxt += "ROM files extensions accepted: \"%s\"\n" % (EsSystemConf.listExtension(data, False))
-        if "comment_en" in data:
-            infoTxt += "\n" + data["comment_en"]
-        infoTxt += "-------------------------------------------------------------------------------\n"
-        infoTxt += "Extensions des fichiers ROMs permises: \"%s\"\n" % (EsSystemConf.listExtension(data, False))
-        if "comment_fr" in data:
-            infoTxt += "\n" + data["comment_fr"]
-
-        arqtxt = romsdir + "/" + subdir + "/" + "_info.txt"
-
-        systemsInfo = open(arqtxt, 'w')
-        systemsInfo.write(infoTxt)
-        systemsInfo.close()
-
     # Write the information in the es_features.cfg file
     @staticmethod
     def createEsFeatures(system, featuresYaml, SystemSpecificEmulators):
@@ -209,14 +197,14 @@ class EsSystemConf:
                     emulator_featuresTxt += f"''{system}.{feature}''"
             # Since RetroArch is so prevalent, it's worth having a stock description of it.
             if emulator == "libretro":
-                featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro/(core name)\".\n\n"
+                featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro/(core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
             else:
                 featuresTxt += f"==== {emulator} ====\n\n"
 
             # Special exceptions for special emulators.
             if emulator == "libretro":
                 featuresTxt += "=== RetroArch configuration ===\n\n"
-                featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]].\n\n"
+                featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]]. Most RetroArch related settings can be altered from Batocera's EmulationStation.\n\n"
                 featuresTxt += f"Standardized features available to all libretro cores: {emulator_featuresTxt}\n\n"
             else:
                 featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
@@ -312,6 +300,7 @@ class EsSystemConf:
             #else:
                 #featuresTxt += "\n"
         #featuresTxt += "\n"
+
         return featuresTxt
 
     # Feature printer. Return a string of the feature intended to be used in the table.
@@ -330,21 +319,27 @@ class EsSystemConf:
         rettext += f"{choicetext}. |\n"
         return rettext
 
-    # Returns the extensions supported by the emulator
-    @staticmethod
-    def listExtension(data, uppercase):
-        extension = ""
+    # Returns a list of the extensions supported by the emulator
+    def listExtension(data):
+        extension = []
         if "extensions" in data:
-            extensions = data["extensions"]
-            firstExt = True
-            for item in extensions:
-                if not firstExt:
-                    extension += " "
-                firstExt = False
-                extension += "." + str(item).lower()
-                if uppercase == True:
-                    extension += " ." + str(item).upper()
-        return extension
+            extensions = list(data['extensions'])
+        return extensions
+
+    # Returns a string of the extensions supported by the emulator
+    # Convert a list of extensions to a proper string.
+    @staticmethod
+    def listExtensionStr(listdata, uppercase):
+        extensiontmp = ""
+        firstExt = True
+        for item in listdata:
+            if not firstExt:
+                extensiontmp += ", "
+            firstExt = False
+            extensiontmp += "''." + str(item).lower() + "''"
+            if uppercase == True:
+                extensiontmp += str(item).upper()
+        return extensiontmp
 
     # Returns group to emulator rom folder
     @staticmethod
@@ -360,7 +355,7 @@ class EsSystemConf:
     def listEmulators(system, rules):
         # Set up some known values.
         pathValue      = EsSystemConf.systemPath(system, rules)
-        listExtensions = EsSystemConf.listExtension(rules, False)
+        listExtensions = EsSystemConf.listExtension(rules)
 
         # What we will be returning later.
         listEmulatorsTxt = ""
@@ -372,33 +367,32 @@ class EsSystemConf:
 
         # What if there's only one emulator?
         if len(emulators) == 1:
+            emulator = list(rules['emulators'].keys())[0]
             # What's the emulator name?
-            listEmulatorsTxt += f"  * **Emulator:** {list(rules['emulators'].keys())[0]}"
+            listEmulatorsTxt += f"  * **Emulator:** {emulator}"
             # Make a list of all the cores.
             corelist = EsSystemConf.listcores(system, rules)
             # What if this one emulator has multiple cores?
             if len(corelist) >= 2:
-                listEmulatorsTxt += "\n    * **Cores available:** "
+                listEmulatorsTxt += "\n  * **Cores available:** "
                 # We need a temp string with a unique name to help with counting.
                 whackycore = ""
-                for core in rules['emulators'][list(rules['emulators'].keys())[0]]:
+                for core in rules['emulators'][emulator]:
                     if whackycore != "":
                         whackycore += ", "
-                    whackycore += f"{core}"
+                    whackycore += f"[[#{emulator}/{core}|{core}]]"
                 listEmulatorsTxt += whackycore
             else:
                 # Otherwise, we'll just append the only core.
-                listEmulatorsTxt += f"/{list(rules['emulators'][list(rules['emulators'].keys())[0]])[0]}"
+                listEmulatorsTxt += f"/{list(rules['emulators'][emulator])[0]}"
             listEmulatorsTxt += "\n"
             if listExtensions != "":
                 # Folder path?
                 if pathValue != "":
                     listEmulatorsTxt += f"  * **Folder:** ''{pathValue}''\n"
             # Accepted ROMs?
-            listEmulatorsTxt += "  * **Accepted ROM formats:**"
-            # Loop to add all the successive formats.
-            for extension in rules['extensions']:
-                listEmulatorsTxt += f" ''.{extension}''"
+            listEmulatorsTxt += "  * **Accepted ROM formats:** "
+            listEmulatorsTxt += EsSystemConf.listExtensionStr(listExtensions, False)
             listEmulatorsTxt += "\n"
             # BIOS files (WIP)
             # BIOS required? (WIP)
@@ -436,7 +430,7 @@ class EsSystemConf:
                         # Only for cores not the first.
                         if not core == list(emulatorData.keys())[0]:
                             # Insert the emulator/core name.
-                            coresTxt += f"| [[#{emulator}/{core}|└───/{core}]] |"
+                            coresTxt += f"| [[#{emulator}/{core}|{emulator}/{core}]] |"
                         else:
                             # Insert the full emulator/core name.
                             coresTxt += f"/{core}|{emulator}/{core}]] |"
@@ -499,9 +493,18 @@ class EsSystemConf:
     def createControls(system, rules):
         # Header.
         controlTxt = "===== Controls =====\n\n"
-        controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n"
+        controlTxt += f"The default button mapping for the {system}'s controls is as follows:\n\n"
+        controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n\n"
         
-        return controlTxt        
+        return controlTxt
+
+    @staticmethod
+    def troubleshooting():
+        # Header
+        troubleTxt = "===== Troubleshooting =====\n\n"
+        troubleTxt += "For further troubleshooting, refer to the [[:support|generic support pages]].\n\n"
+
+        return troubleTxt
 
 if __name__ == "__main__":
   # Set up the parser.
@@ -529,5 +532,6 @@ if __name__ == "__main__":
   sys.stdout.buffer.write( output['es_systems'].encode('utf-8') )
   sys.stdout.write( output['es_features'] )
   sys.stdout.write( output['controls'] )
+  sys.stdout.write( output['troubleshooting'] )
   sys.stdout.flush()
   sys.exit(0)
