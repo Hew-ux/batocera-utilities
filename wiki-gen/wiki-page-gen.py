@@ -61,7 +61,7 @@ class EsSystemConf:
         es_feature = EsSystemConf.createEsFeatures(system, featuresYaml, es_sys_rules[system]['emulators'])
 
         # Generate the controls.
-        controls = EsSystemConf.createControls(system, es_sys_rules[system]['emulators'])
+        controls = EsSystemConf.createControls(system, es_sys_rules[system])
 
         # Add the troubleshooting template.
         trouble = EsSystemConf.troubleshooting()
@@ -83,7 +83,7 @@ class EsSystemConf:
         # Opening WRAPs.
         systemTxt = "<WRAP group>\n<WRAP round box twothirds column>\n"
         # Embed logo from es-carbon. Concatenation is easier to understand here.
-        systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&h=300 }}\n\n"
+        systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&0x300 }}\n\n"
         # Main header.
         systemTxt += f"====== {rules['name']} ======\n\n"
         # Summary intro, full name.
@@ -96,7 +96,7 @@ class EsSystemConf:
             systemTxt += f"This system scrapes metadata for the ''{platformValue}'' group(s)"
         systemTxt += f" and loads the ''{EsSystemConf.themeName(system, rules)}'' set from the currently selected theme, if available.\n\n"
         if groupValue != "":
-            systemTxt += "Grouped with the %s group of systems.\n\n" % (groupValue)  
+            systemTxt += f"Grouped with the \"{groupValue}\" group of systems.\n"
 
         # Close WRAP round box twothirds column, begin WRAP third column.
         systemTxt += "</WRAP>\n\n<WRAP third column>\n"
@@ -114,10 +114,11 @@ class EsSystemConf:
         systemTxt += "===== BIOS =====\n\n"
         systemTxt += "^ MD5 checksum ^ Share file path ^ Description ^\n"
         # Here is where you'll code in the BIOS list.
+        systemTxt += "FIXME\n"
         systemTxt += "\n"
 
         systemTxt += "===== ROMs =====\n\n"
-        systemTxt += f"Place your {system} ROMs in ''{pathValue}''.\n"
+        systemTxt += f"Place your {rules['name']} ROMs in ''{pathValue}''.\n"
         systemTxt += "\n"
 
         return systemTxt
@@ -210,7 +211,7 @@ class EsSystemConf:
                 featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
             
             # Table header.
-            tableheader = "^ ES setting name ''batocera.conf key'' ^ Description => ES option ''key value'' ^\n"
+            tableheader = "^ ES setting name ''batocera.conf_key'' ^ Description => ES option ''key_value'' ^\n"
             # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
             if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator]:
                 if "cfeatures" in features[emulator]:
@@ -369,18 +370,22 @@ class EsSystemConf:
         if len(emulators) == 1:
             emulator = list(rules['emulators'].keys())[0]
             # What's the emulator name?
-            listEmulatorsTxt += f"  * **Emulator:** {emulator}"
+            # Special exceptions.
+            if emulator == "libretro":
+                listEmulatorsTxt += "  * **Emulator:** RetroArch\n"
+            else:
+                listEmulatorsTxt += f"  * **Emulator:** {emulator}\n"
             # Make a list of all the cores.
             corelist = EsSystemConf.listcores(system, rules)
             # What if this one emulator has multiple cores?
             if len(corelist) >= 2:
-                listEmulatorsTxt += "\n  * **Cores available:** "
+                listEmulatorsTxt += "  * **Cores available:** "
                 # We need a temp string with a unique name to help with counting.
                 whackycore = ""
                 for core in rules['emulators'][emulator]:
                     if whackycore != "":
                         whackycore += ", "
-                    whackycore += f"[[#{emulator}/{core}|{core}]]"
+                    whackycore += f"[[#{emulator}_{core}|{core}]]"
                 listEmulatorsTxt += whackycore
             else:
                 # Otherwise, we'll just append the only core.
@@ -415,7 +420,7 @@ class EsSystemConf:
                 coresTxt = ""
                 # If there's only one core:
                 if len(corelist) == 1:
-                    coresTxt += f"/{corelist[0]}|{emulator}/{corelist[0]}]] |"
+                    coresTxt += f"_{corelist[0]}|{emulator}/{corelist[0]}]] |"
                     # Wipe the string for this core in case the last core for the last emulator had any.
                     incompatible_extensionsTxt = ""
                     if "incompatible_extensions" in emulatorData[core]:
@@ -433,7 +438,7 @@ class EsSystemConf:
                             coresTxt += f"| [[#{emulator}/{core}|{emulator}/{core}]] |"
                         else:
                             # Insert the full emulator/core name.
-                            coresTxt += f"/{core}|{emulator}/{core}]] |"
+                            coresTxt += f"_{core}|{emulator}/{core}]] |"
                         incompatible_extensionsTxt = ""
                         if "incompatible_extensions" in emulatorData[core]:
                             for ext in emulatorData[core]["incompatible_extensions"]:
@@ -493,7 +498,7 @@ class EsSystemConf:
     def createControls(system, rules):
         # Header.
         controlTxt = "===== Controls =====\n\n"
-        controlTxt += f"The default button mapping for the {system}'s controls is as follows:\n\n"
+        controlTxt += f"Here are the {rules['name']}'s controls shown on a [[:configure_a_controller|Batocera Retropad]]:\n\n"
         controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n\n"
         
         return controlTxt
