@@ -324,7 +324,8 @@ class EsSystemConf:
     def listExtension(data):
         extension = []
         if "extensions" in data:
-            extensions = list(data['extensions'])
+            #extensions = list(data['extensions'])
+            extensions = data['extensions']
         return extensions
 
     # Returns a string of the extensions supported by the emulator
@@ -424,6 +425,8 @@ class EsSystemConf:
                 if pathValue != "":
                     listEmulatorsTxt += f"  * **Folder:** ''{pathValue}''\n"
             listEmulatorsTxt += "\n"
+
+            # Create a table for all the available cores for all the emulators.
             for emulator in emulators:
                 emulatorData = rules["emulators"][emulator]
 
@@ -438,14 +441,21 @@ class EsSystemConf:
                         coresTxt += f"|{emulator}]] |"
                     else:
                         coresTxt += f"_{corelist[0]}|{emulator}/{corelist[0]}]] |"
-                    # Wipe the string for this core in case the last core for the last emulator had any.
-                    incompatible_extensionsTxt = ""
                     if "incompatible_extensions" in emulatorData[core]:
+                        compatibleExtlist = listExtensions
                         for ext in emulatorData[core]["incompatible_extensions"]:
-                            if incompatible_extensionsTxt != "":
-                                incompatible_extensionsTxt += " "
-                            incompatible_extensionsTxt += "." + ext.lower()
-                        incompatible_extensionsTxt = " incompatible_extensions=\"" + incompatible_extensionsTxt + "\""
+                            # Error claiming to not see element in the list occurs here.
+                            # Not able to solve it but ignoring it, this still functions fine.
+                            # Better than nothing.
+                            try:
+                                compatibleExtlist.remove(ext)
+                            except:
+                                compatibleExtlist
+                        compatibleExtstr = ""
+                        compatibleExtstr += EsSystemConf.listExtensionStr(compatibleExtlist, False)
+                        coresTxt += f" {compatibleExtstr} |"
+                        # Set flag to create table header later.
+                        uniqueroms = True
                     coresTxt += "\n"
                 else:
                     for core in emulatorData:
@@ -457,15 +467,23 @@ class EsSystemConf:
                         else:
                             # Insert the full emulator/core name.
                             coresTxt += f"| [[#{emulator}_{core}|{emulator}/{core}]] |"
-                        incompatible_extensionsTxt = ""
+                        # If this core in particular has incompatible roms
                         if "incompatible_extensions" in emulatorData[core]:
+                            compatibleExtlist = listExtensions
                             for ext in emulatorData[core]["incompatible_extensions"]:
-                                if incompatible_extensionsTxt != "":
-                                    incompatible_extensionsTxt += " "
-                                incompatible_extensionsTxt += "." + ext.lower()
-                            coresTxt += f" Incompatible extensions: {incompatible_extensionsTxt} |"
+                                # As above.
+                                try:
+                                    compatibleExtlist.remove(ext)
+                                except:
+                                    compatibleExtlist
+                            compatibleExtstr = ""
+                            compatibleExtstr += EsSystemConf.listExtensionStr(compatibleExtlist, False)
+                            coresTxt += f" {compatibleExtstr} |"
                             # Set flag to create table header later.
                             uniqueroms = True
+                        else:
+                            coresTxt += EsSystemConf.listExtensionStr(listExtensions, False)
+                            coresTxt += "|"
                         # Append the launch command. WIP
                         #coresTxt += EsSystemConf.commandName(rules)
                         coresTxt += "\n"
