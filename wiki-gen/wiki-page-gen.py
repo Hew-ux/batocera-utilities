@@ -83,7 +83,7 @@ class EsSystemConf:
         # Opening WRAPs.
         systemTxt = "<WRAP group>\n<WRAP round box twothirds column>\n"
         # Embed logo from es-carbon. Concatenation is easier to understand here.
-        systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&0x300 }}\n\n"
+        systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&300 }}\n\n"
         # Main header.
         systemTxt += f"====== {rules['name']} ======\n\n"
         # Summary intro, full name.
@@ -93,10 +93,10 @@ class EsSystemConf:
         systemTxt += f" It was released in {rules['release']}.\n\n"
         # Platform (metadata scraper group), theme (theme to load from current theme-set) and whether it's grouped or not.
         if platformValue != "":
-            systemTxt += f"This system scrapes metadata for the ''{platformValue}'' group(s)"
-        systemTxt += f" and loads the ''{EsSystemConf.themeName(system, rules)}'' set from the currently selected theme, if available.\n\n"
+            systemTxt += f"This system scrapes metadata for the \"{platformValue}\" group(s)"
+        systemTxt += f" and loads the ''{EsSystemConf.themeName(system, rules)}'' set from the currently selected theme, if available.\n"
         if groupValue != "":
-            systemTxt += f"Grouped with the \"{groupValue}\" group of systems.\n"
+            systemTxt += f"\nGrouped with the \"{groupValue}\" group of systems.\n"
 
         # Close WRAP round box twothirds column, begin WRAP third column.
         systemTxt += "</WRAP>\n\n<WRAP third column>\n"
@@ -217,7 +217,7 @@ class EsSystemConf:
                 if "cfeatures" in features[emulator]:
                     # Insert text for the settings that apply to all systems for that emulator.
                     featuresTxt += tableheader
-                    featuresTxt += "^ Settings that apply to all cores of this emulator |\n"
+                    featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
                     for cfeature in features[emulator]["cfeatures"]:
                         featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
                     featuresTxt += "\n"
@@ -247,14 +247,14 @@ class EsSystemConf:
                                 featuresTxt += tableheader
                                 # Print out the custom features if applicable.
                                 if "cfeatures" in features[emulator]["cores"][core]:
-                                   featuresTxt += "^ Settings that apply to all systems this core supports |\n"
+                                   featuresTxt += "^ Settings that apply to all systems this core supports ||\n"
                                    for cfeature in features[emulator]["cores"][core]["cfeatures"]:
-                                       featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["cores"][core], cfeature)
+                                       featuresTxt += EsSystemConf.featureprinter("global", features[emulator]["cores"][core], cfeature)
                                 # Print out the custom features that only apply to particular systems.
                                 if "systems" in features[emulator]["cores"][core]:
                                    for system in features[emulator]["cores"][core]["systems"]:
                                        system_featuresTxt = ""
-                                       featuresTxt += f"^ Settings specific to {system} |"
+                                       featuresTxt += f"^ Settings specific to {system} ||"
                                        if "features" in features[emulator]["cores"][core]["systems"][system]:
                                            for feature in features[emulator]["cores"][core]["systems"][system]["features"]:
                                                if system_featuresTxt != "":
@@ -283,7 +283,7 @@ class EsSystemConf:
                                 if system_featuresTxt != "":
                                     system_featuresTxt += ", "
                                 system_featuresTxt += f"{feature}."
-                        featuresTxt += "^ Settings specific to ''{}'' |".format(system)
+                        featuresTxt += f"^ Settings specific to ''{system}'' ||"
                         # What if there are no additional standardized features?
                         if not system_featuresTxt:
                             featuresTxt += "\n"
@@ -372,9 +372,9 @@ class EsSystemConf:
             # What's the emulator name?
             # Special exceptions.
             if emulator == "libretro":
-                listEmulatorsTxt += "  * **Emulator:** RetroArch\n"
+                listEmulatorsTxt += "  * **Emulator:** [[#retroarch|RetroArch]]\n"
             else:
-                listEmulatorsTxt += f"  * **Emulator:** {emulator}\n"
+                listEmulatorsTxt += f"  * **Emulator:** [[#{emulator}|{emulator}]]\n"
             # Make a list of all the cores.
             corelist = EsSystemConf.listcores(system, rules)
             # What if this one emulator has multiple cores?
@@ -387,10 +387,15 @@ class EsSystemConf:
                         whackycore += ", "
                     whackycore += f"[[#{emulator}_{core}|{core}]]"
                 listEmulatorsTxt += whackycore
+                listEmulatorsTxt += "\n"
             else:
-                # Otherwise, we'll just append the only core.
-                listEmulatorsTxt += f"/{list(rules['emulators'][emulator])[0]}"
-            listEmulatorsTxt += "\n"
+                # Store the single core's name.
+                singlecore = list(rules['emulators'][emulator])[0]
+                # Only run if the core name is not the emulator's name.
+                if singlecore != emulator:
+                    # Append the only core as a new line to the bullet list.
+                    listEmulatorsTxt += f"  * **Core:** [[#{emulator}_{singlecore}|{emulator}/{singlecore}]]"
+                    listEmulatorsTxt += "\n"
             if listExtensions != "":
                 # Folder path?
                 if pathValue != "":
@@ -410,17 +415,29 @@ class EsSystemConf:
             emulatorsTxt = ""
             # To keep track of if emulators/cores use different extensions.
             uniqueroms = False
+            # Add generic accetped ROMs.
+            listEmulatorsTxt += "  * **Accepted ROM formats:** "
+            listEmulatorsTxt += EsSystemConf.listExtensionStr(listExtensions, False)
+            listEmulatorsTxt += "\n"
+            if listExtensions != "":
+                # Folder path?
+                if pathValue != "":
+                    listEmulatorsTxt += f"  * **Folder:** ''{pathValue}''\n"
+            listEmulatorsTxt += "\n"
             for emulator in emulators:
                 emulatorData = rules["emulators"][emulator]
-                # Opening part.
-                emulatorTxt = f"| [[#{emulator}"
 
                 # CORES
                 corelist = EsSystemConf.listcores(system, rules)
                 coresTxt = ""
                 # If there's only one core:
                 if len(corelist) == 1:
-                    coresTxt += f"_{corelist[0]}|{emulator}/{corelist[0]}]] |"
+                    # Opening part.
+                    coresTxt = f"| [[#{emulator}"
+                    if corelist[0] == emulator:
+                        coresTxt += f"|{emulator}]] |"
+                    else:
+                        coresTxt += f"_{corelist[0]}|{emulator}/{corelist[0]}]] |"
                     # Wipe the string for this core in case the last core for the last emulator had any.
                     incompatible_extensionsTxt = ""
                     if "incompatible_extensions" in emulatorData[core]:
@@ -433,12 +450,13 @@ class EsSystemConf:
                 else:
                     for core in emulatorData:
                         # Only for cores not the first.
-                        if not core == list(emulatorData.keys())[0]:
-                            # Insert the emulator/core name.
-                            coresTxt += f"| [[#{emulator}/{core}|{emulator}/{core}]] |"
+                        #if not core == list(emulatorData.keys())[0]:
+                        # What if the core name is the same as the emulator name?
+                        if core == emulator:
+                            coresTxt += f"| [[#{emulator}|{emulator}]] |"
                         else:
                             # Insert the full emulator/core name.
-                            coresTxt += f"_{core}|{emulator}/{core}]] |"
+                            coresTxt += f"| [[#{emulator}_{core}|{emulator}/{core}]] |"
                         incompatible_extensionsTxt = ""
                         if "incompatible_extensions" in emulatorData[core]:
                             for ext in emulatorData[core]["incompatible_extensions"]:
@@ -458,7 +476,7 @@ class EsSystemConf:
                     emulatorTxt = ""
                 else:
                     # Append the core information.
-                    emulatorTxt  += coresTxt
+                    emulatorTxt  = coresTxt
                     emulatorsTxt += emulatorTxt
             # Start the table.
             listEmulatorsTxt += "^ Emulators ^"
@@ -498,7 +516,7 @@ class EsSystemConf:
     def createControls(system, rules):
         # Header.
         controlTxt = "===== Controls =====\n\n"
-        controlTxt += f"Here are the {rules['name']}'s controls shown on a [[:configure_a_controller|Batocera Retropad]]:\n\n"
+        controlTxt += f"Here are the default {rules['name']}'s controls shown on a [[:configure_a_controller|Batocera Retropad]]:\n\n"
         controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n\n"
         
         return controlTxt
@@ -507,6 +525,7 @@ class EsSystemConf:
     def troubleshooting():
         # Header
         troubleTxt = "===== Troubleshooting =====\n\n"
+        troubleTxt += "==== Further troubleshooting ====\n\n"
         troubleTxt += "For further troubleshooting, refer to the [[:support|generic support pages]].\n\n"
 
         return troubleTxt
