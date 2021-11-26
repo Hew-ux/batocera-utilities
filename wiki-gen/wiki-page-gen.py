@@ -2,24 +2,12 @@
 import yaml
 import re
 import argparse
-#import os
+import os
 #import shutil
 import sys
 import requests
 from collections import OrderedDict
 from operator import itemgetter
-
-# This is used to organise the loader. Not sure if want.
-def ordered_load(stream, Loader=yaml.Loader, object_pairs_hook=OrderedDict):
-    class OrderedLoader(Loader):
-        pass
-    def construct_mapping(loader, node):
-        loader.flatten_mapping(node)
-        return object_pairs_hook(loader.construct_pairs(node))
-    OrderedLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        construct_mapping)
-    return yaml.load(stream, OrderedLoader)
 
 class EsSystemConf:
 
@@ -28,7 +16,7 @@ class EsSystemConf:
 
     # Generate the es_systems.cfg file by searching the information in the es_system.yml file
     @staticmethod
-    def generate(system, es_sys, featuresYaml, verbose):
+    def generate(system, es_sys, featuresYaml, bioslocal, verbose):
         # If default, download the latest es_sys from the Github.
         if not es_sys:
             es_sys_rules = yaml.safe_load( requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_systems.yml", allow_redirects=True ).text )
@@ -53,7 +41,7 @@ class EsSystemConf:
             # Exit the program, indicating that an error occurred.
             sys.exit(2)
         # Append the information.
-        es_system += EsSystemConf.generateSystem(system, es_sys_rules[system], verbose)
+        es_system += EsSystemConf.generateSystem(system, es_sys_rules[system], bioslocal, verbose)
 
         if verbose:
             print("Generating the feature lists...")
@@ -70,12 +58,13 @@ class EsSystemConf:
 
     # Generate emulator system
     @staticmethod
-    def generateSystem(system, rules, verbose):
+    def generateSystem(system, rules, bioslocal, verbose):
+        # Create the list of all emulators for the system.
         listEmulatorsTxt = EsSystemConf.listEmulators(system, rules)
 
+        # Some static information.
         pathValue      = EsSystemConf.systemPath(system, rules)
         platformValue  = EsSystemConf.systemPlatform(system, rules)
-        #listExtensions = EsSystemConf.listExtensionStr(rules, False)
         groupValue     = EsSystemConf.systemGroup(system, rules)
         # This can be per-core, but needs to be deterministically coded later.
         #command        = EsSystemConf.commandName(rules)
@@ -83,6 +72,7 @@ class EsSystemConf:
         # Opening WRAPs.
         systemTxt = "<WRAP group>\n<WRAP round box twothirds column>\n"
         # Embed logo from es-carbon. Concatenation is easier to understand here.
+        # If this doesn't work, it may be a PNG instead. To code for later!
         systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&300 }}\n\n"
         # Main header.
         systemTxt += f"====== {rules['name']} ======\n\n"
@@ -101,6 +91,7 @@ class EsSystemConf:
         # Close WRAP round box twothirds column, begin WRAP third column.
         systemTxt += "</WRAP>\n\n<WRAP third column>\n"
         # Embed console art from es-carbon.
+        # If this doesn't work, it might have a completely different name (like "gc" instead of "gamecube"). Requires manual intervention.
         systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/consoles/" + system + ".png?nolink&350 |}}\n"
         # Close both WRAPs.
         systemTxt += "</WRAP>\n</WRAP>\n\n"
@@ -112,9 +103,8 @@ class EsSystemConf:
 
         # Template sections
         systemTxt += "===== BIOS =====\n\n"
-        systemTxt += "^ MD5 checksum ^ Share file path ^ Description ^\n"
         # Here is where you'll code in the BIOS list.
-        systemTxt += "FIXME\n"
+        systemTxt += EsSystemConf.biostable(system, rules['name'], bioslocal)
         systemTxt += "\n"
 
         systemTxt += "===== ROMs =====\n\n"
@@ -122,6 +112,38 @@ class EsSystemConf:
         systemTxt += "\n"
 
         return systemTxt
+
+    # Returns the table of all the BIOS files.
+    @staticmethod
+    def biostable(system, fullname, bioslocal):
+        # If the flag has not been set, download the latest batocera-system file from the repo and rename it to batocerasystems.py to be able to import it later.
+        if not bioslocal:
+            batocerasystemsfile = requests.get("https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/core/batocera-scripts/scripts/batocera-systems", allow_redirects=True)
+            # Open the file for editing, overwriting it.
+            file = open("batocerasystems.py", "w")
+            # Write the text saved to variable into the file. Text function needed as otherwise it just returns the request status.
+            file.write(batocerasystemsfile.text)
+            # Flush all data and close the file.
+            file.close()
+        # Very difficult to grab file from source and import its variable. Will settle for just manually downloading the file and putting it in the correct location.
+        try:
+            from batocerasystems import systems
+        except:
+            print("No local batocerasystems.py file, remove -b flag or place the 'batocera-systems' file at 'batocerasystems.py' in the current working directory and try again.")
+            sys.exit(1)
+        bioslist = systems
+        if system in bioslist:
+            biostableTxt = "^ MD5 checksum ^ Share file path ^ Description ^\n"
+            for bios in bioslist[system]['biosFiles']:
+                # Sanity check to make sure it exists.
+                if bios['md5']:
+                    # Print the new row for that particular BIOS file.
+                    biostableTxt += f"| {bios['md5']} | {bios['file']} | |\n"
+        else:
+            # What if there are no BIOS files in the database?
+            biostableTxt = f"No {fullname} emulator in Batocera needs a BIOS file to run.\n"
+
+        return biostableTxt
 
     # Returns the path to the rom folder for the emulator
     @staticmethod
@@ -566,10 +588,11 @@ if __name__ == "__main__":
   #" emulator.")
   parser.add_argument('-s', '--systems_yml', help="(Optional) Specify a es_systems.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
   parser.add_argument('-f', '--features_yml', help="(Optional) Specify a es_features.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
+  parser.add_argument('-b', '--bios', help="don't download the latest bios list from the batocera.linux repository.", action="store_true")
   args = parser.parse_args()
 
   # Save the output of the generator to a dictionary to be accessed later.
-  output = EsSystemConf.generate(args.system, args.systems_yml, args.features_yml, args.verbose)
+  output = EsSystemConf.generate(args.system, args.systems_yml, args.features_yml, args.bios, args.verbose)
   # Send the two string results to stdout. Encode to 'utf-8' then write directly to the buffer to avoid 'latin-1' encoding errors (probably not a good idea but makes this script more robust).
   sys.stdout.buffer.write( output['es_systems'].encode('utf-8') )
   sys.stdout.write( output['es_features'] )
