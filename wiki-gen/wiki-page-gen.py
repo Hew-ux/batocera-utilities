@@ -12,7 +12,7 @@ from operator import itemgetter
 class EsSystemConf:
 
     default_parentpath = "/userdata/roms"
-    default_command    = "python /usr/lib/python3.9/site-packages/configgen/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM%"
+    default_command    = "python /usr/lib/python3.9/site-packages/configgen/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -systemname %SYSTEMNAME% -gamename %GAMENAME%"
 
     # Generate the es_systems.cfg file by searching the information in the es_system.yml file
     @staticmethod
@@ -221,6 +221,9 @@ class EsSystemConf:
             # Since RetroArch is so prevalent, it's worth having a stock description of it.
             if emulator == "libretro":
                 featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro/(core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
+            # Same for MAME.
+            elif emulator == "mame":
+                featuresTxt += "==== MAME ====\n\n[[https://www.mamedev.org/|MAME]], the Multiple Arcade Machine Emulator, is a multi-purpose emulation framework which facilitates the emulation of vintage hardware and software. Originally targeting vintage arcade machines, MAME has since absorbed the sister-project [[http://mess.redump.net/start|MESS]] (Multi Emulator Super System) to support a wide variety of vintage computers, video game consoles and calculators as well. MAME doesn't use an individual \"core\" for each system like RetroArch does, instead the ROM itself usually contains the necessary information to accurately emulate it, thus making it specific to the version of MAME it was made for. Overall it's a very complicated subject, we have a [[:arcade|guide specific to arcade]] just for it.\n\n"
             else:
                 featuresTxt += f"==== {emulator} ====\n\n"
 
@@ -229,6 +232,10 @@ class EsSystemConf:
                 featuresTxt += "=== RetroArch configuration ===\n\n"
                 featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]]. Most RetroArch related settings can be altered from Batocera's EmulationStation.\n\n"
                 featuresTxt += f"Standardized features available to all libretro cores: {emulator_featuresTxt}\n\n"
+            elif emulator == "mame":
+                featuresTxt += "=== MAME configuration ===\n\n"
+                featuresTxt += "MAME offers a **[[https://docs.mamedev.org/usingmame/ui.html|Menu]]** in-game (''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} or ''[Tab]'' on the keyboard). This can be used to manually adjust inputs or game settings. If you're having issues with a specific game, check the [[https://wiki.mamedev.org/index.php/FAQ:Games|MAMEdev FAQ for that game here.]] For MESS systems specifically, you might find more information on [[http://mess.redump.net/start|MESS's wiki]]. All options can also be edited by opening the ''mame.ini'' file.\n\n"
+                featuresTxt += f"Standardized features available to all MAME systems: {emulator_featuresTxt}\n\n"
             else:
                 featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
             
@@ -503,10 +510,7 @@ class EsSystemConf:
                             coresTxt += f" {compatibleExtstr} |"
                             # Set flag to create table header later.
                             uniqueroms = True
-                        else:
-                            coresTxt += EsSystemConf.listExtensionStr(listExtensions, False)
-                            coresTxt += "|"
-                        # Append the launch command. WIP
+                        # Append the launch command. WIP. Probably will never do as it's too complicated, would have to dive into each emulator configgen to work it out. Better just to write up a generic guide.
                         #coresTxt += EsSystemConf.commandName(rules)
                         coresTxt += "\n"
 
