@@ -235,7 +235,7 @@ class EsSystemConf:
             elif emulator == "mame":
                 featuresTxt += "=== MAME configuration ===\n\n"
                 featuresTxt += "MAME offers a **[[https://docs.mamedev.org/usingmame/ui.html|Menu]]** in-game (''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} or ''[Tab]'' on the keyboard). This can be used to manually adjust inputs or game settings. If you're having issues with a specific game, check the [[https://wiki.mamedev.org/index.php/FAQ:Games|MAMEdev FAQ for that game here.]] For MESS systems specifically, you might find more information on [[http://mess.redump.net/start|MESS's wiki]]. All options can also be edited by opening the ''mame.ini'' file.\n\n"
-                featuresTxt += f"Standardized features available to all MAME systems: {emulator_featuresTxt}\n\n"
+                featuresTxt += f"Standardized features available to all versions of this emulator: {emulator_featuresTxt}\n\n"
             else:
                 featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
             
@@ -244,9 +244,15 @@ class EsSystemConf:
             # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
             if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator]:
                 if "cfeatures" in features[emulator]:
-                    # Insert text for the settings that apply to all systems for that emulator.
+                    # Insert text for the settings that apply to all cores of that emulator.
                     featuresTxt += tableheader
-                    featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
+                    # Exceptions for known emulators that don't use cores.
+                    if emulator == "mame":
+                        featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
+                    elif emulator == "mupen64":
+                        featuresTxt += "^ Settings that apply to all video plugins of this emulator ||\n"
+                    else:
+                        featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
                     for cfeature in features[emulator]["cfeatures"]:
                         featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
                     featuresTxt += "\n"
@@ -333,7 +339,7 @@ class EsSystemConf:
 
         return featuresTxt
 
-    # Feature printer. Return a string of the feature intended to be used in the table.
+    # Feature printer. Return a string of the features intended to be used in the table.
     @staticmethod
     def featureprinter(system, data, custfeatname):
         description = ""
@@ -447,13 +453,23 @@ class EsSystemConf:
             uniqueroms = False
             # Add generic accetped ROMs.
             listEmulatorsTxt += "  * **Accepted ROM formats:** "
-            listEmulatorsTxt += EsSystemConf.listExtensionStr(listExtensions, False)
+            allacceptableroms = EsSystemConf.listExtensionStr(listExtensions, False)
+            listEmulatorsTxt += allacceptableroms
             listEmulatorsTxt += "\n"
             if listExtensions != "":
                 # Folder path?
                 if pathValue != "":
                     listEmulatorsTxt += f"  * **Folder:** ''{pathValue}''\n"
             listEmulatorsTxt += "\n"
+
+            # Inefficient, but we need to check for unique compatible ROMs first.
+            for emulator in emulators:
+                emulatorData = rules["emulators"][emulator]
+                # Check if there are any cores that have incompatible extensions set.
+                for core in emulatorData:
+                    if "incompatible_extensions" in emulatorData[core]:
+                        # Set flag to create table header later.
+                        uniqueroms = True
 
             # Create a table for all the available cores for all the emulators.
             for emulator in emulators:
@@ -462,10 +478,12 @@ class EsSystemConf:
                 # CORES
                 corelist = EsSystemConf.listcores(system, rules)
                 coresTxt = ""
+
                 # If there's only one core:
                 if len(corelist) == 1:
                     # Opening part.
                     coresTxt = f"| [[#{emulator}"
+                    # What if the core name IS the emulator name?
                     if corelist[0] == emulator:
                         coresTxt += f"|{emulator}]] |"
                     else:
@@ -483,8 +501,9 @@ class EsSystemConf:
                         compatibleExtstr = ""
                         compatibleExtstr += EsSystemConf.listExtensionStr(compatibleExtlist, False)
                         coresTxt += f" {compatibleExtstr} |"
-                        # Set flag to create table header later.
-                        uniqueroms = True
+                    elif uniqueroms:
+                        # If any other cores have unique roms, list all the compatible extensions compatible with this system.
+                        coresTxt += f" {allacceptableroms} |"
                     coresTxt += "\n"
                 else:
                     for core in emulatorData:
@@ -508,8 +527,9 @@ class EsSystemConf:
                             compatibleExtstr = ""
                             compatibleExtstr += EsSystemConf.listExtensionStr(compatibleExtlist, False)
                             coresTxt += f" {compatibleExtstr} |"
-                            # Set flag to create table header later.
-                            uniqueroms = True
+                        elif uniqueroms:
+                            # If any other cores have unique roms, list all the compatible extensions compatible with this system.
+                            coresTxt += f" {allacceptableroms} |"
                         # Append the launch command. WIP. Probably will never do as it's too complicated, would have to dive into each emulator configgen to work it out. Better just to write up a generic guide.
                         #coresTxt += EsSystemConf.commandName(rules)
                         coresTxt += "\n"
