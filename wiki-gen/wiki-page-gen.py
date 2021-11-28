@@ -249,8 +249,6 @@ class EsSystemConf:
                     # Exceptions for known emulators that don't use cores.
                     if emulator == "mame":
                         featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
-                    elif emulator == "mupen64":
-                        featuresTxt += "^ Settings that apply to all video plugins of this emulator ||\n"
                     else:
                         featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
                     for cfeature in features[emulator]["cfeatures"]:
