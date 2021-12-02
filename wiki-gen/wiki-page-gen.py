@@ -242,7 +242,7 @@ class EsSystemConf:
                     emulator_featuresTxt += f"''{system}.{feature}''"
             # Since RetroArch is so prevalent, it's worth having a stock description of it.
             if emulator == "libretro":
-                featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro/(core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
+                featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro: (core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
             # Same for MAME.
             elif emulator == "mame":
                 featuresTxt += "==== MAME ====\n\n[[https://www.mamedev.org/|MAME]], the Multiple Arcade Machine Emulator, is a multi-purpose emulation framework which facilitates the emulation of vintage hardware and software. Originally targeting vintage arcade machines, MAME has since absorbed the sister-project [[http://mess.redump.net/start|MESS]] (Multi Emulator Super System) to support a wide variety of vintage computers, video game consoles and calculators as well. MAME doesn't use an individual \"core\" for each system like RetroArch does, instead the ROM itself usually contains the necessary information to accurately emulate it, thus making it specific to the version of MAME it was made for. Overall it's a very complicated subject, we have a [[:arcade|guide specific to arcade]] just for it.\n\n"
@@ -281,13 +281,13 @@ class EsSystemConf:
                     # Loop through just the emulators that system supports.
                     for core in SystemSpecificEmulators[emulator]:
                         # Header for the unique core.
-                        featuresTxt += f"=== {emulator}/{core} ===\n\n"
+                        featuresTxt += f"=== {emulator}: {core} ===\n\n"
                         # Initialize temporary string.
                         core_featuresTxt = ""
                         # Safeguard for if the core doesn't have any features at all.
                         if core in features[emulator]["cores"]:
                             # Subheader for the specific emulator/core.
-                            featuresTxt += f"== {emulator}/{core} configuration ==\n\n"
+                            featuresTxt += f"== {emulator}: {core} configuration ==\n\n"
                             # Grab all standardized features.
                             if "features" in features[emulator]["cores"][core]:
                                 for feature in features[emulator]["cores"][core]["features"]:
@@ -429,6 +429,8 @@ class EsSystemConf:
             # Special exceptions.
             if emulator == "libretro":
                 listEmulatorsTxt += "  * **Emulator:** [[#retroarch|RetroArch]]\n"
+            elif emulator == "mame":
+                listEmulatorsTxt += "  * **Emulator:** [[#mame|MAME]]\n"
             else:
                 listEmulatorsTxt += f"  * **Emulator:** [[#{emulator}|{emulator}]]\n"
             # Make a list of all the cores.
@@ -441,7 +443,7 @@ class EsSystemConf:
                 for core in rules['emulators'][emulator]:
                     if whackycore != "":
                         whackycore += ", "
-                    whackycore += f"[[#{emulator}_{core}|{core}]]"
+                    whackycore += f"[[#{emulator}:_{core}|{core}]]"
                 listEmulatorsTxt += whackycore
                 listEmulatorsTxt += "\n"
             else:
@@ -450,7 +452,7 @@ class EsSystemConf:
                 # Only run if the core name is not the emulator's name.
                 if singlecore != emulator:
                     # Append the only core as a new line to the bullet list.
-                    listEmulatorsTxt += f"  * **Core:** [[#{emulator}_{singlecore}|{emulator}/{singlecore}]]"
+                    listEmulatorsTxt += f"  * **Core:** [[#{emulator}_{singlecore}|{emulator}: {singlecore}]]"
                     listEmulatorsTxt += "\n"
             if listExtensions != "":
                 # Folder path?
@@ -507,7 +509,7 @@ class EsSystemConf:
                     if corelist[0] == emulator:
                         coresTxt += f"|{emulator}]] |"
                     else:
-                        coresTxt += f"_{corelist[0]}|{emulator}/{corelist[0]}]] |"
+                        coresTxt += f":_{corelist[0]}|{emulator}: {corelist[0]}]] |"
                     if "incompatible_extensions" in emulatorData[core]:
                         compatibleExtlist = listExtensions
                         for ext in emulatorData[core]["incompatible_extensions"]:
@@ -534,7 +536,7 @@ class EsSystemConf:
                             coresTxt += f"| [[#{emulator}|{emulator}]] |"
                         else:
                             # Insert the full emulator/core name.
-                            coresTxt += f"| [[#{emulator}_{core}|{emulator}/{core}]] |"
+                            coresTxt += f"| [[#{emulator}:_{core}|{emulator}: {core}]] |"
                         # If this core in particular has incompatible roms
                         if "incompatible_extensions" in emulatorData[core]:
                             compatibleExtlist = listExtensions
