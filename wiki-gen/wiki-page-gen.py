@@ -11,7 +11,7 @@ from operator import itemgetter
 
 class EsSystemConf:
 
-    #default_parentpath = "/userdata/roms"
+    default_parentpath = "/userdata/roms"
     #default_command    = "python /usr/lib/python3.9/site-packages/configgen/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -systemname %SYSTEMNAME% -gamename %GAMENAME%"
 
     # Generate the es_systems.cfg file by searching the information in the es_system.yml file
@@ -28,7 +28,7 @@ class EsSystemConf:
                 # Flush all data and close the file.
                 file.close()
                 #es_sys_rules = yaml.safe_load( requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_systems.yml", allow_redirects=True ).text )
-                es_sys_rules = yaml.safe_load(es_sys_rules)
+                es_sys_rules = yaml.safe_load(es_sys_rules.text)
             else:
                 es_sys_rules = yaml.safe_load(open("es_systems.yml", "r"))
         else:
@@ -57,7 +57,7 @@ class EsSystemConf:
         if verbose:
             print("Generating the feature lists...")
         # Generate all the feature text.
-        es_feature = EsSystemConf.createEsFeatures(system, featuresYaml, es_sys_rules[system]['emulators'])
+        es_feature = EsSystemConf.createEsFeatures(system, featuresYaml, local_feat, es_sys_rules[system]['emulators'])
 
         # Generate the controls.
         controls = EsSystemConf.createControls(system, es_sys_rules[system])
@@ -120,7 +120,7 @@ class EsSystemConf:
         systemTxt += "===== ROMs =====\n\n"
         systemTxt += f"Place your {rules['name']} ROMs in ''{pathValue}''.\n\n"
         # Any special notes left by the developer?
-        systemTxt += EsSystemConf.infoSystem(system, rules)
+        systemTxt += EsSystemConf.infoSystem(rules)
 
         return systemTxt
 
@@ -149,7 +149,7 @@ class EsSystemConf:
                 # Sanity check to make sure it exists.
                 if bios['md5']:
                     # Print the new row for that particular BIOS file.
-                    biostableTxt += f"| {bios['md5']} | {bios['file']} | |\n"
+                    biostableTxt += f"| ''{bios['md5']}'' | ''{bios['file']}'' | |\n"
         else:
             # What if there are no BIOS files in the database?
             biostableTxt = f"No {fullname} emulator in Batocera needs a BIOS file to run.\n"
@@ -211,10 +211,21 @@ class EsSystemConf:
 
     # Write the information in the es_features.cfg file
     @staticmethod
-    def createEsFeatures(system, featuresYaml, SystemSpecificEmulators):
+    def createEsFeatures(system, featuresYaml, local_feat, SystemSpecificEmulators):
         # If no featuresyaml specified, download the latest from the github.
         if not featuresYaml:
-            features = yaml.safe_load(requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_features.yml", allow_redirects=True ).text)
+            if not local_feat:
+                features = requests.get("https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_features.yml", allow_redirects=True)
+                # Open the file for editing, overwriting it.
+                file = open("es_features.yml", "w")
+                # Write the text saved to variable into the file. Text funciton needed as otherwise it just returns the request status.
+                file.write(features.text)
+                # Flush all data and close the file.
+                file.close()
+                features = yaml.safe_load(features.text)
+            else:
+                features = yaml.safe_load(open("es_features.yml", "r"))
+            #features = yaml.safe_load(requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_features.yml", allow_redirects=True ).text)
         else:
             features = yaml.safe_load(open(featuresYaml, "r"))
         #features = ordered_load(open(featuresYaml, "r"))
@@ -604,13 +615,13 @@ class EsSystemConf:
         return troubleTxt
 
     @staticmethod
-    def infoSystem(system, rules):
+    def infoSystem(rules):
         # Initialize local string.
         infoTxt = ""
         # Safeguard in case there is no comment.
-        if "comment_en" in rules[system]:
-            infoTxt += rules[system]["comment_en"]
-            infoTxt += "\n\n"
+        if "comment_en" in rules:
+            infoTxt += rules["comment_en"]
+            infoTxt += "\n"
         # Return the string.
         return infoTxt
 
