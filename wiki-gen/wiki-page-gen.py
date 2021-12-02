@@ -11,15 +11,26 @@ from operator import itemgetter
 
 class EsSystemConf:
 
-    default_parentpath = "/userdata/roms"
-    default_command    = "python /usr/lib/python3.9/site-packages/configgen/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -systemname %SYSTEMNAME% -gamename %GAMENAME%"
+    #default_parentpath = "/userdata/roms"
+    #default_command    = "python /usr/lib/python3.9/site-packages/configgen/emulatorlauncher.py %CONTROLLERSCONFIG% -system %SYSTEM% -rom %ROM% -systemname %SYSTEMNAME% -gamename %GAMENAME%"
 
     # Generate the es_systems.cfg file by searching the information in the es_system.yml file
     @staticmethod
-    def generate(system, es_sys, featuresYaml, bioslocal, verbose):
+    def generate(system, es_sys, local_sys, featuresYaml, local_feat, bioslocal, verbose):
         # If default, download the latest es_sys from the Github.
         if not es_sys:
-            es_sys_rules = yaml.safe_load( requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_systems.yml", allow_redirects=True ).text )
+            if not local_sys:
+                es_sys_rules = requests.get("https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_systems.yml", allow_redirects=True)
+                # Open the file for editing, overwriting it.
+                file = open("es_systems.yml", "w")
+                # Write the text saved to variable into the file. Text function needed as otherwise it just returns the request status.
+                file.write(es_sys_rules.text)
+                # Flush all data and close the file.
+                file.close()
+                #es_sys_rules = yaml.safe_load( requests.get( "https://raw.githubusercontent.com/batocera-linux/batocera.linux/master/package/batocera/emulationstation/batocera-es-system/es_systems.yml", allow_redirects=True ).text )
+                es_sys_rules = yaml.safe_load(es_sys_rules)
+            else:
+                es_sys_rules = yaml.safe_load(open("es_systems.yml", "r"))
         else:
             es_sys_rules = yaml.safe_load(open(es_sys, "r"))
         es_system = ""
@@ -103,13 +114,13 @@ class EsSystemConf:
 
         # Template sections
         systemTxt += "===== BIOS =====\n\n"
-        # Here is where you'll code in the BIOS list.
         systemTxt += EsSystemConf.biostable(system, rules['name'], bioslocal)
         systemTxt += "\n"
 
         systemTxt += "===== ROMs =====\n\n"
-        systemTxt += f"Place your {rules['name']} ROMs in ''{pathValue}''.\n"
-        systemTxt += "\n"
+        systemTxt += f"Place your {rules['name']} ROMs in ''{pathValue}''.\n\n"
+        # Any special notes left by the developer?
+        systemTxt += EsSystemConf.infoSystem(system, rules)
 
         return systemTxt
 
@@ -592,6 +603,17 @@ class EsSystemConf:
 
         return troubleTxt
 
+    @staticmethod
+    def infoSystem(system, rules):
+        # Initialize local string.
+        infoTxt = ""
+        # Safeguard in case there is no comment.
+        if "comment_en" in rules[system]:
+            infoTxt += rules[system]["comment_en"]
+            infoTxt += "\n\n"
+        # Return the string.
+        return infoTxt
+
 if __name__ == "__main__":
   # Set up the parser.
   parser = argparse.ArgumentParser( description = "Returns all" \
@@ -608,13 +630,15 @@ if __name__ == "__main__":
   #parser.add_argument('-c', '--core', help="specified core for the emulator," \
   #" when excluded assumes you want all cores for the specified system and/or" \
   #" emulator.")
-  parser.add_argument('-s', '--systems_yml', help="(Optional) Specify a es_systems.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
-  parser.add_argument('-f', '--features_yml', help="(Optional) Specify a es_features.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
+  parser.add_argument('-s', '--systems_yml', help="Specify a es_systems.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
+  parser.add_argument('-ls', '--local_systems_yml', help="don't download the latest systems.yml definition file, use current local copy instead.", action="store_true")
+  parser.add_argument('-f', '--features_yml', help="Specify a es_features.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
+  parser.add_argument('-lf', '--local_features_yml', help="don't download the latest features.yml definition file, use current local copy instead.", action="store_true")
   parser.add_argument('-b', '--bios', help="don't download the latest bios list from the batocera.linux repository.", action="store_true")
   args = parser.parse_args()
 
   # Save the output of the generator to a dictionary to be accessed later.
-  output = EsSystemConf.generate(args.system, args.systems_yml, args.features_yml, args.bios, args.verbose)
+  output = EsSystemConf.generate(args.system, args.systems_yml, args.local_systems_yml, args.features_yml, args.local_features_yml, args.bios, args.verbose)
   # Send the two string results to stdout. Encode to 'utf-8' then write directly to the buffer to avoid 'latin-1' encoding errors (probably not a good idea but makes this script more robust).
   sys.stdout.buffer.write( output['es_systems'].encode('utf-8') )
   sys.stdout.write( output['es_features'] )
