@@ -443,7 +443,7 @@ class EsSystemConf:
                 for core in rules['emulators'][emulator]:
                     if whackycore != "":
                         whackycore += ", "
-                    whackycore += f"[[#{emulator}:_{core}|{core}]]"
+                    whackycore += f"[[#{emulator}:_{core}|{emulator}: {core}]]"
                 listEmulatorsTxt += whackycore
                 listEmulatorsTxt += "\n"
             else:
@@ -452,7 +452,7 @@ class EsSystemConf:
                 # Only run if the core name is not the emulator's name.
                 if singlecore != emulator:
                     # Append the only core as a new line to the bullet list.
-                    listEmulatorsTxt += f"  * **Core:** [[#{emulator}_{singlecore}|{emulator}: {singlecore}]]"
+                    listEmulatorsTxt += f"  * **Core:** [[#{emulator}:_{singlecore}|{emulator}: {singlecore}]]"
                     listEmulatorsTxt += "\n"
             if listExtensions != "":
                 # Folder path?
@@ -507,9 +507,16 @@ class EsSystemConf:
                     coresTxt = f"| [[#{emulator}"
                     # What if the core name IS the emulator name?
                     if corelist[0] == emulator:
-                        coresTxt += f"|{emulator}]] |"
+                        if emulator == "mame":
+                            coresTxt += "|MAME]] |"
+                        else:
+                            coresTxt += f"|{emulator}]] |"
                     else:
-                        coresTxt += f":_{corelist[0]}|{emulator}: {corelist[0]}]] |"
+                        # Known emulators (skip RetroArch as they use libretro cores.
+                        if emulator == "mame":
+                            coresTxt += f":_{corelist[0]}|MAME: {corelist[0]}]] |"
+                        else:
+                            coresTxt += f":_{corelist[0]}|{emulator}: {corelist[0]}]] |"
                     if "incompatible_extensions" in emulatorData[core]:
                         compatibleExtlist = listExtensions
                         for ext in emulatorData[core]["incompatible_extensions"]:
@@ -643,15 +650,21 @@ if __name__ == "__main__":
   #parser.add_argument('-c', '--core', help="specified core for the emulator," \
   #" when excluded assumes you want all cores for the specified system and/or" \
   #" emulator.")
+  parser.add_argument('-l', '--local_global', help="Use local copies instead of downloading files online. Equivalent to activating all -ls, -lf and -b flags.", action="store_true")
   parser.add_argument('-s', '--systems_yml', help="Specify a es_systems.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
   parser.add_argument('-ls', '--local_systems_yml', help="don't download the latest systems.yml definition file, use current local copy instead.", action="store_true")
   parser.add_argument('-f', '--features_yml', help="Specify a es_features.yml definition file. If unspecified, will download the latest from the batocera.linux repository.")
   parser.add_argument('-lf', '--local_features_yml', help="don't download the latest features.yml definition file, use current local copy instead.", action="store_true")
-  parser.add_argument('-b', '--bios', help="don't download the latest bios list from the batocera.linux repository.", action="store_true")
+  parser.add_argument('-lb', '--local_bios', help="don't download the latest bios list from the batocera.linux repository.", action="store_true")
   args = parser.parse_args()
 
+  # If the local_global is set, activate both other flags irrelevant of their status.
+  if args.local_global:
+    args.local_systems_yml = True
+    args.local_features_yml = True
+    args.local_bios = True
   # Save the output of the generator to a dictionary to be accessed later.
-  output = EsSystemConf.generate(args.system, args.systems_yml, args.local_systems_yml, args.features_yml, args.local_features_yml, args.bios, args.verbose)
+  output = EsSystemConf.generate(args.system, args.systems_yml, args.local_systems_yml, args.features_yml, args.local_features_yml, args.local_bios, args.verbose)
   # Send the two string results to stdout. Encode to 'utf-8' then write directly to the buffer to avoid 'latin-1' encoding errors (probably not a good idea but makes this script more robust).
   sys.stdout.buffer.write( output['es_systems'].encode('utf-8') )
   sys.stdout.write( output['es_features'] )
