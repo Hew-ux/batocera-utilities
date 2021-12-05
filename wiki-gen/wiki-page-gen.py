@@ -235,126 +235,130 @@ class EsSystemConf:
         for emulator in SystemSpecificEmulators:
             # Initialize the emulator_featuresTxt string. Since videomode is available to all systems, we can initialize with that.
             emulator_featuresTxt = f"''{system}.videomode''"
-            if "features" in features[emulator]:
-                for feature in features[emulator]["features"]:
-                    if emulator_featuresTxt != "":
-                        emulator_featuresTxt += ", "
-                    emulator_featuresTxt += f"''{system}.{feature}''"
-            # Since RetroArch is so prevalent, it's worth having a stock description of it.
-            if emulator == "libretro":
-                featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro: (core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
-            # Same for MAME.
-            elif emulator == "mame":
-                featuresTxt += "==== MAME ====\n\n[[https://www.mamedev.org/|MAME]], the Multiple Arcade Machine Emulator, is a multi-purpose emulation framework which facilitates the emulation of vintage hardware and software. Originally targeting vintage arcade machines, MAME has since absorbed the sister-project [[http://mess.redump.net/start|MESS]] (Multi Emulator Super System) to support a wide variety of vintage computers, video game consoles and calculators as well. MAME doesn't use an individual \"core\" for each system like RetroArch does, instead the ROM itself usually contains the necessary information to accurately emulate it, thus making it specific to the version of MAME it was made for. Overall it's a very complicated subject, we have a [[:arcade|guide specific to arcade]] just for it.\n\n"
-            else:
-                featuresTxt += f"==== {emulator} ====\n\n"
+            # Safety check if the emulator even exists in features.yml
+            if emulator in features:
+                if "features" in features[emulator]:
+                    for feature in features[emulator]["features"]:
+                        if emulator_featuresTxt != "":
+                            emulator_featuresTxt += ", "
+                        emulator_featuresTxt += f"''{system}.{feature}''"
+                # Since RetroArch is so prevalent, it's worth having a stock description of it.
+                if emulator == "libretro":
+                    featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro: (core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
+                # Same for MAME.
+                elif emulator == "mame":
+                    featuresTxt += "==== MAME ====\n\n[[https://www.mamedev.org/|MAME]], the Multiple Arcade Machine Emulator, is a multi-purpose emulation framework which facilitates the emulation of vintage hardware and software. Originally targeting vintage arcade machines, MAME has since absorbed the sister-project [[http://mess.redump.net/start|MESS]] (Multi Emulator Super System) to support a wide variety of vintage computers, video game consoles and calculators as well. MAME doesn't use an individual \"core\" for each system like RetroArch does, instead the ROM itself usually contains the necessary information to accurately emulate it, thus making it specific to the version of MAME it was made for. Overall it's a very complicated subject, we have a [[:arcade|guide specific to arcade]] just for it.\n\n"
+                else:
+                    featuresTxt += f"==== {emulator} ====\n\n"
 
-            # Special exceptions for special emulators.
-            if emulator == "libretro":
-                featuresTxt += "=== RetroArch configuration ===\n\n"
-                featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]]. Most RetroArch related settings can be altered from Batocera's EmulationStation.\n\n"
-                featuresTxt += f"Standardized features available to all libretro cores: {emulator_featuresTxt}\n\n"
-            elif emulator == "mame":
-                featuresTxt += "=== MAME configuration ===\n\n"
-                featuresTxt += "MAME offers a **[[https://docs.mamedev.org/usingmame/ui.html|Menu]]** in-game (''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} or ''[Tab]'' on the keyboard). This can be used to manually adjust inputs or game settings. If you're having issues with a specific game, check the [[https://wiki.mamedev.org/index.php/FAQ:Games|MAMEdev FAQ for that game here.]] For MESS systems specifically, you might find more information on [[http://mess.redump.net/start|MESS's wiki]]. All options can also be edited by opening the ''mame.ini'' file.\n\n"
-                featuresTxt += f"Standardized features available to all versions of this emulator: {emulator_featuresTxt}\n\n"
-            else:
-                featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
-            
-            # Table header.
-            tableheader = "^ ES setting name ''batocera.conf_key'' ^ Description => ES option ''key_value'' ^\n"
-            # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
-            if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator]:
-                if "cfeatures" in features[emulator]:
-                    # Insert text for the settings that apply to all cores of that emulator.
-                    featuresTxt += tableheader
-                    # Exceptions for known emulators that don't use cores.
-                    if emulator == "mame":
-                        featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
-                    else:
-                        featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
-                    for cfeature in features[emulator]["cfeatures"]:
-                        featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
-                    featuresTxt += "\n"
-                # In the case that the emulator contains a cores subdictionary:
-                if "cores" in features[emulator]:
-                    # Loop through just the emulators that system supports.
-                    for core in SystemSpecificEmulators[emulator]:
-                        # Header for the unique core.
-                        featuresTxt += f"=== {emulator}: {core} ===\n\n"
-                        # Initialize temporary string.
-                        core_featuresTxt = ""
-                        # Safeguard for if the core doesn't have any features at all.
-                        if core in features[emulator]["cores"]:
-                            # Subheader for the specific emulator/core.
-                            featuresTxt += f"== {emulator}: {core} configuration ==\n\n"
-                            # Grab all standardized features.
-                            if "features" in features[emulator]["cores"][core]:
-                                for feature in features[emulator]["cores"][core]["features"]:
-                                    if core_featuresTxt != "":
-                                        core_featuresTxt += ", "
-                                    core_featuresTxt += feature
-                                if not features[emulator]["cores"][core]:
-                                    featuresTxt += f"Standardized features for this core: {core_featuresTxt}\n\n"
-                            # Optimization to only execute the following if the core has custom features.
-                            if "cfeatures" in features[emulator]["cores"][core] or "systems" in features[emulator]["cores"][core]:
-                                # Create the feature table.
-                                featuresTxt += tableheader
-                                # Print out the custom features if applicable.
-                                if "cfeatures" in features[emulator]["cores"][core]:
-                                   featuresTxt += "^ Settings that apply to all systems this core supports ||\n"
-                                   for cfeature in features[emulator]["cores"][core]["cfeatures"]:
-                                       featuresTxt += EsSystemConf.featureprinter("global", features[emulator]["cores"][core], cfeature)
-                                # Print out the custom features that only apply to particular systems.
-                                if "systems" in features[emulator]["cores"][core]:
-                                   for system in features[emulator]["cores"][core]["systems"]:
-                                       system_featuresTxt = ""
-                                       featuresTxt += f"^ Settings specific to {system} ||"
-                                       if "features" in features[emulator]["cores"][core]["systems"][system]:
-                                           for feature in features[emulator]["cores"][core]["systems"][system]["features"]:
-                                               if system_featuresTxt != "":
-                                                   system_featuresTxt += ", "
-                                               system_featuresTxt += f"{feature}."
-                                           featuresTxt += f" Standardized features: {system_featuresTxt} |"
-                                       featuresTxt += f"\n"
-                                       if "cfeatures" in features[emulator]["cores"][core]["systems"][system]:
-                                           for cfeature in features[emulator]["cores"][core]["systems"][system]["cfeatures"]:
-                                               featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["cores"][core]["systems"][system], cfeature)
-                                # Insert text after the table for system-specific to core options.
-                                featuresTxt += "\n"
-                            #else:
-                                # Text before the table only when there's no custom or system subdictionaries for the core. Currently unused.
-                                #featuresTxt += "uniquetext {} somemoreuniquetext {} whatami\n".format(core, core_featuresTxt)
-                # For system subdictionaries in the feature list:
-                if "systems" in features[emulator]:
-                    # Insert text before the table. Currently unused.
-                    #featuresTxt += ""
-                    # Grab the features only for all systems. We don't want this as we only want one system.
-                    #for system in features[emulator]["systems"]:
-                    system_featuresTxt = ""
-                    if system in features[emulator]["systems"]:
-                        if "features" in features[emulator]["systems"][system]:
-                            for feature in features[emulator]["systems"][system]["features"]:
-                                if system_featuresTxt != "":
-                                    system_featuresTxt += ", "
-                                system_featuresTxt += f"{feature}."
-                        featuresTxt += f"^ Settings specific to ''{system}'' ||"
-                        # What if there are no additional standardized features?
-                        if not system_featuresTxt:
-                            featuresTxt += "\n"
+                # Special exceptions for special emulators.
+                if emulator == "libretro":
+                    featuresTxt += "=== RetroArch configuration ===\n\n"
+                    featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]]. Most RetroArch related settings can be altered from Batocera's EmulationStation.\n\n"
+                    featuresTxt += f"Standardized features available to all libretro cores: {emulator_featuresTxt}\n\n"
+                elif emulator == "mame":
+                    featuresTxt += "=== MAME configuration ===\n\n"
+                    featuresTxt += "MAME offers a **[[https://docs.mamedev.org/usingmame/ui.html|Menu]]** in-game (''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} or ''[Tab]'' on the keyboard). This can be used to manually adjust inputs or game settings. If you're having issues with a specific game, check the [[https://wiki.mamedev.org/index.php/FAQ:Games|MAMEdev FAQ for that game here.]] For MESS systems specifically, you might find more information on [[http://mess.redump.net/start|MESS's wiki]]. All options can also be edited by opening the ''mame.ini'' file.\n\n"
+                    featuresTxt += f"Standardized features available to all versions of this emulator: {emulator_featuresTxt}\n\n"
+                else:
+                    featuresTxt += f"=== {emulator} configuration ===\n\nStandardized features available to all cores of this emulator: {emulator_featuresTxt}\n\n"
+                
+                # Table header.
+                tableheader = "^ ES setting name ''batocera.conf_key'' ^ Description => ES option ''key_value'' ^\n"
+                # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
+                if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator]:
+                    if "cfeatures" in features[emulator]:
+                        # Insert text for the settings that apply to all cores of that emulator.
+                        featuresTxt += tableheader
+                        # Exceptions for known emulators that don't use cores.
+                        if emulator == "mame":
+                            featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
                         else:
-                            featuresTxt += " Standardized features for this system only: {} |\n".format(system_featuresTxt)
-                        # Safeguard to only attempt the loop if there are custom features present.
-                        if "cfeatures" in features[emulator]["systems"][system]:
-                            # Iterate through all the custom features on this emulator for this system only.
-                            for cfeature in features[emulator]["systems"][system]["cfeatures"]:
-                                # Call special function to list the feature and all its choices.
-                                featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["systems"][system], cfeature)
-                        # Insert text after the table for system-specific settings. Currently unused.
+                            featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
+                        for cfeature in features[emulator]["cfeatures"]:
+                            featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
+                        featuresTxt += "\n"
+                    # In the case that the emulator contains a cores subdictionary:
+                    if "cores" in features[emulator]:
+                        # Loop through just the emulators that system supports.
+                        for core in SystemSpecificEmulators[emulator]:
+                            # Header for the unique core.
+                            featuresTxt += f"=== {emulator}: {core} ===\n\n"
+                            # Initialize temporary string.
+                            core_featuresTxt = ""
+                            # Safeguard for if the core doesn't have any features at all.
+                            if core in features[emulator]["cores"]:
+                                # Subheader for the specific emulator/core.
+                                featuresTxt += f"== {emulator}: {core} configuration ==\n\n"
+                                # Grab all standardized features.
+                                if "features" in features[emulator]["cores"][core]:
+                                    for feature in features[emulator]["cores"][core]["features"]:
+                                        if core_featuresTxt != "":
+                                            core_featuresTxt += ", "
+                                        core_featuresTxt += feature
+                                    if not features[emulator]["cores"][core]:
+                                        featuresTxt += f"Standardized features for this core: {core_featuresTxt}\n\n"
+                                # Optimization to only execute the following if the core has custom features.
+                                if "cfeatures" in features[emulator]["cores"][core] or "systems" in features[emulator]["cores"][core]:
+                                    # Create the feature table.
+                                    featuresTxt += tableheader
+                                    # Print out the custom features if applicable.
+                                    if "cfeatures" in features[emulator]["cores"][core]:
+                                       featuresTxt += "^ Settings that apply to all systems this core supports ||\n"
+                                       for cfeature in features[emulator]["cores"][core]["cfeatures"]:
+                                           featuresTxt += EsSystemConf.featureprinter("global", features[emulator]["cores"][core], cfeature)
+                                    # Print out the custom features that only apply to particular systems.
+                                    if "systems" in features[emulator]["cores"][core]:
+                                       for system in features[emulator]["cores"][core]["systems"]:
+                                           system_featuresTxt = ""
+                                           featuresTxt += f"^ Settings specific to {system} ||"
+                                           if "features" in features[emulator]["cores"][core]["systems"][system]:
+                                               for feature in features[emulator]["cores"][core]["systems"][system]["features"]:
+                                                   if system_featuresTxt != "":
+                                                       system_featuresTxt += ", "
+                                                   system_featuresTxt += f"{feature}."
+                                               featuresTxt += f" Standardized features: {system_featuresTxt} |"
+                                           featuresTxt += f"\n"
+                                           if "cfeatures" in features[emulator]["cores"][core]["systems"][system]:
+                                               for cfeature in features[emulator]["cores"][core]["systems"][system]["cfeatures"]:
+                                                   featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["cores"][core]["systems"][system], cfeature)
+                                    # Insert text after the table for system-specific to core options.
+                                    featuresTxt += "\n"
+                                #else:
+                                    # Text before the table only when there's no custom or system subdictionaries for the core. Currently unused.
+                                    #featuresTxt += "uniquetext {} somemoreuniquetext {} whatami\n".format(core, core_featuresTxt)
+                    # For system subdictionaries in the feature list:
+                    if "systems" in features[emulator]:
+                        # Insert text before the table. Currently unused.
                         #featuresTxt += ""
-                #featuresTxt += "\n"
-            #else:
-                #featuresTxt += "\n"
+                        # Grab the features only for all systems. We don't want this as we only want one system.
+                        #for system in features[emulator]["systems"]:
+                        system_featuresTxt = ""
+                        if system in features[emulator]["systems"]:
+                            if "features" in features[emulator]["systems"][system]:
+                                for feature in features[emulator]["systems"][system]["features"]:
+                                    if system_featuresTxt != "":
+                                        system_featuresTxt += ", "
+                                    system_featuresTxt += f"{feature}."
+                            featuresTxt += f"^ Settings specific to ''{system}'' ||"
+                            # What if there are no additional standardized features?
+                            if not system_featuresTxt:
+                                featuresTxt += "\n"
+                            else:
+                                featuresTxt += " Standardized features for this system only: {} |\n".format(system_featuresTxt)
+                            # Safeguard to only attempt the loop if there are custom features present.
+                            if "cfeatures" in features[emulator]["systems"][system]:
+                                # Iterate through all the custom features on this emulator for this system only.
+                                for cfeature in features[emulator]["systems"][system]["cfeatures"]:
+                                    # Call special function to list the feature and all its choices.
+                                    featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["systems"][system], cfeature)
+            else:
+                featuresTxt += "There are no configuration options available yet.\n\n"
+                            # Insert text after the table for system-specific settings. Currently unused.
+                            #featuresTxt += ""
+                    #featuresTxt += "\n"
+                #else:
+                    #featuresTxt += "\n"
         #featuresTxt += "\n"
 
         return featuresTxt
@@ -431,6 +435,8 @@ class EsSystemConf:
                 listEmulatorsTxt += "  * **Emulator:** [[#retroarch|RetroArch]]\n"
             elif emulator == "mame":
                 listEmulatorsTxt += "  * **Emulator:** [[#mame|MAME]]\n"
+                global arcadeMAME
+                arcadeMAME = True
             else:
                 listEmulatorsTxt += f"  * **Emulator:** [[#{emulator}|{emulator}]]\n"
             # Make a list of all the cores.
@@ -540,7 +546,10 @@ class EsSystemConf:
                         #if not core == list(emulatorData.keys())[0]:
                         # What if the core name is the same as the emulator name?
                         if core == emulator:
-                            coresTxt += f"| [[#{emulator}|{emulator}]] |"
+                            if emulator == "mame":
+                                coresTxt += "| [[#mame|MAME]] |"
+                            else:
+                                coresTxt += f"| [[#{emulator}|{emulator}]] |"
                         else:
                             # Insert the full emulator/core name.
                             coresTxt += f"| [[#{emulator}:_{core}|{emulator}: {core}]] |"
@@ -619,6 +628,9 @@ class EsSystemConf:
         # Header
         troubleTxt = "===== Troubleshooting =====\n\n"
         troubleTxt += "==== Further troubleshooting ====\n\n"
+        # If MAME was detected.
+        if "arcadeMAME" in globals():
+            troubleTxt += "For problems with MAME specifically, there are some tips on the [[systems:mame#troubleshooting|troubleshooting section on MAME's system page.]]\n\n"
         troubleTxt += "For further troubleshooting, refer to the [[:support|generic support pages]].\n\n"
 
         return troubleTxt
