@@ -54,10 +54,17 @@ class EsSystemConf:
         # Append the information.
         es_system += EsSystemConf.generateSystem(system, es_sys_rules[system], bioslocal, verbose)
 
-        if verbose:
-            print("Generating the feature lists...")
-        # Generate all the feature text.
-        es_feature = EsSystemConf.createEsFeatures(system, featuresYaml, local_feat, es_sys_rules[system]['emulators'])
+        # Safeguard in case system has no emulators (like ports).
+        if "emulators" in es_sys_rules[system]:
+            if verbose:
+                print("Generating the feature lists...")
+            # Generate all the feature text.
+            es_feature = EsSystemConf.createEsFeatures(system, featuresYaml, local_feat, es_sys_rules[system]['emulators'])
+        else:
+            if verbose:
+                print("System has no emulators, not generating a feature list.")
+            # Fill variable with empty string to avoid errors later.
+            es_feature = ""
 
         # Generate the controls.
         controls = EsSystemConf.createControls(system, es_sys_rules[system])
