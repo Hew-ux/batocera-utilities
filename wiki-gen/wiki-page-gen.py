@@ -626,7 +626,7 @@ class EsSystemConf:
         # Header.
         controlTxt = "===== Controls =====\n\n"
         controlTxt += f"Here are the default {rules['name']}'s controls shown on a [[:configure_a_controller|Batocera Retropad]]:\n\n"
-        controlTxt += "{{ https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png }}\n\n"
+        controlTxt += "{{https://raw.githubusercontent.com/batocera-linux/batocera-controller-overlays/master/solid-4k/" + system + ".png}}\n\n"
         
         return controlTxt
 
