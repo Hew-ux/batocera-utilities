@@ -375,8 +375,11 @@ class EsSystemConf:
     def featureprinter(system, data, custfeatname):
         description = ""
         rettext = ""
+        submenu = ""
         if 'description' in data['cfeatures'][custfeatname]:
             description = data['cfeatures'][custfeatname]['description']
+        if 'submenu' in data['cfeatures'][custfeatname]:
+            rettext += f"| **{data['cfeatures'][custfeatname]['submenu']} |\n"
         rettext += f"| **{data['cfeatures'][custfeatname]['prompt']} ''{system}.{custfeatname}''** | {description}\\\\ => "
         choicetext = ""
         for choice in data['cfeatures'][custfeatname]['choices']:
