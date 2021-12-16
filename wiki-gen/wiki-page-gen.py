@@ -87,8 +87,10 @@ class EsSystemConf:
         # This can be per-core, but needs to be deterministically coded later.
         #command        = EsSystemConf.commandName(rules)
 
+        # 
+        systemTxt = "<WRAP center round todo>\nThis article needs some TLC. Read at your own risk.\n</WRAP>\n"
         # Opening WRAPs.
-        systemTxt = "<WRAP group>\n<WRAP round box twothirds column>\n"
+        systemTxt += "<WRAP group>\n<WRAP round box twothirds column>\n"
         # Embed logo from es-carbon. Concatenation is easier to understand here.
         # If this doesn't work, it may be a PNG instead. To code for later!
         systemTxt += "{{ https://raw.githubusercontent.com/fabricecaruso/es-theme-carbon/master/art/logos/" + system + ".svg?nolink&300 }}\n\n"
