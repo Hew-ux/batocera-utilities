@@ -33,7 +33,7 @@ echo "Now connect Pixelcade to a free USB port on your device"
 echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
 echo "Grab a coffee or tea as this installer will take around 15 minutes"
 
-INSTALLPATH="${HOME}/"
+INSTALLPATH="/userdata/system/"
 
 # let's make sure we have Baticera installation
 if batocera-info | grep -q 'System'; then
