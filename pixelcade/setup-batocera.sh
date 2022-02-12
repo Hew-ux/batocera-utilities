@@ -34,7 +34,6 @@ echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB an
 echo "Grab a coffee or tea as this installer will take around 15 minutes"
 
 INSTALLPATH="${HOME}/"
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
 # let's make sure we have Baticera installation
 if batocera-info | grep -q 'System'; then
@@ -420,8 +419,6 @@ fi
 if [[ -f jdk-x86-64.zip ]]; then
     rm jdk-x86-64.zip
 fi
-
-rm ${SCRIPTPATH}/setup-batocera.sh
 
 if [[ -d ${INSTALLPATH}ptemp ]]; then
     rm -r ${INSTALLPATH}ptemp
