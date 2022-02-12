@@ -44,6 +44,7 @@ else
 fi
 
 killall java
+mkdir ${INSTALLPATH}pixelcade
 
 updateartwork() {  #this is needed for rom names with spaces
 
