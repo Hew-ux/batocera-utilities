@@ -282,9 +282,6 @@ chmod +x ${INSTALLPATH}custom.sh
 
 cd ${INSTALLPATH}pixelcade
 
-echo "Checking for Pixelcade LCDs..."
-${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcadelcdfinder.jar -nogui #check for Pixelcade LCDs
-
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
 echo $version > ${INSTALLPATH}pixelcade/pixelcade-version
 
