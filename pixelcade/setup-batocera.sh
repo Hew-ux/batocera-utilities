@@ -282,6 +282,38 @@ chmod +x ${INSTALLPATH}custom.sh
 
 cd ${INSTALLPATH}pixelcade
 
+echo "Checking for Pixelcade LCDs..."
+${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcadelcdfinder.jar -nogui #check for Pixelcade LCDs
+
+if [[ $pixelcade_found == "true" ]]; then #only run pixelcade if the hardware is there
+  echo "Pixelcade hardware is detected so let's start Pixelcade now"
+  if [[ $odroidn2 == "true" || "$x86_64" == "true" || "$x86_32" == "true" ]]; then #start up work around for Odroid N2 or X86 64 bit
+    source ${INSTALLPATH}custom.sh
+    if [ $? -eq 0 ]; then
+       echo "Pixelcade started succesfully"
+    else
+      echo "[ERROR] Pixelcade did not start succesfully, exiting..."
+      exit 1
+    fi
+    #chmod +x ${INSTALLPATH}ptemp/pixelcade-linux-main/batocera/odroidn2/auto/custom-verbose.sh
+    #source ${INSTALLPATH}ptemp/pixelcade-linux-main/batocera/odroidn2/auto/custom-verbose.sh #we want to run first time in verbose, not silent
+    sleep 8
+    cd ${INSTALLPATH}pixelcade
+    ${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcade.jar -m stream -c mame -g batocera  # let's send a test image and see if it displays
+  else
+    ${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelweb.jar -b -s &
+    if [ $? -eq 0 ]; then
+       echo "Pixelcade started succesfully"
+    else
+      echo "[ERROR] Pixelcade did not start succesfully, exiting..."
+      exit 1
+    fi
+    sleep 8
+    cd ${INSTALLPATH}pixelcade
+    ${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcade.jar -m stream -c mame -g batocera # let's send a test image and see if it displays
+  fi
+fi
+
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
 echo $version > ${INSTALLPATH}pixelcade/pixelcade-version
 
@@ -319,3 +351,5 @@ touch ${INSTALLPATH}pixelcade/system/.initial-date
 
 echo " "
 echo "INSTALLATION COMPLETE , please now reboot and then Pixelcade will be controlled by Batocera"
+
+exit $?
