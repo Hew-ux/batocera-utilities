@@ -283,7 +283,7 @@ chmod +x ${INSTALLPATH}custom.sh
 cd ${INSTALLPATH}pixelcade
 
 echo "Checking for Pixelcade LCDs..."
-${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcadelcdfinder.jar -nogui #check for Pixelcade LCDs
+#${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcadelcdfinder.jar -nogui #check for Pixelcade LCDs
 
 if [[ $pixelcade_found == "true" ]]; then #only run pixelcade if the hardware is there
   echo "Pixelcade hardware is detected so let's start Pixelcade now"
