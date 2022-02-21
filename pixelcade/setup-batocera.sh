@@ -352,4 +352,4 @@ touch ${INSTALLPATH}pixelcade/system/.initial-date
 echo " "
 echo "INSTALLATION COMPLETE , please now reboot and then Pixelcade will be controlled by Batocera"
 
-exit $?
+killall java
