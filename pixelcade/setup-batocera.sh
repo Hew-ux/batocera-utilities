@@ -17,22 +17,22 @@ upgrade_artwork=false
 upgrade_software=false
 version=7  #increment this as the script is updated
 
-cat << "EOF"
-       _          _               _
- _ __ (_)_  _____| | ___ __ _  __| | ___
-| '_ \| \ \/ / _ \ |/ __/ _` |/ _` |/ _ \
-| |_) | |>  <  __/ | (_| (_| | (_| |  __/
-| .__/|_/_/\_\___|_|\___\__,_|\__,_|\___|
-|_|
-EOF
+#cat << "EOF"
+#       _          _               _
+# _ __ (_)_  _____| | ___ __ _  __| | ___
+#| '_ \| \ \/ / _ \ |/ __/ _` |/ _` |/ _ \
+#| |_) | |>  <  __/ | (_| (_| | (_| |  __/
+#| .__/|_/_/\_\___|_|\___\__,_|\__,_|\___|
+#|_|
+#EOF
 
-echo "       Pixelcade LED for Batocera : Installer Version $version    "
-echo ""
-echo "This script will install Pixelcade in your /userdata/system folder"
-echo "Plese ensure you have at least 800 MB of free disk space in /userdata/system"
-echo "Now connect Pixelcade to a free USB port on your device"
-echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
-echo "Grab a coffee or tea as this installer will take around 15 minutes"
+#echo "       Pixelcade LED for Batocera : Installer Version $version    "
+#echo ""
+#echo "This script will install Pixelcade in your /userdata/system folder"
+#echo "Plese ensure you have at least 800 MB of free disk space in /userdata/system"
+#echo "Now connect Pixelcade to a free USB port on your device"
+#echo "Ensure the toggle switch on the Pixelcade board is pointing towards USB and not BT"
+#echo "Grab a coffee or tea as this installer will take around 15 minutes"
 
 INSTALLPATH="/userdata/system/"
 
@@ -41,16 +41,16 @@ killall java
 
 # let's detect if Pixelcade is USB connected, could be 0 or 1 so we need to check both
 if ls /dev/ttyACM0 | grep -q '/dev/ttyACM0'; then
-   echo "Pixelcade LED Marquee Detected on ttyACM0"
+   #echo "Pixelcade LED Marquee Detected on ttyACM0"
    PixelcadePort="/dev/ttyACM0"
    pixelcade_found=true
 else
     if ls /dev/ttyACM1 | grep -q '/dev/ttyACM1'; then
-        echo "Pixelcade LED Marquee Detected on ttyACM1"
+        #echo "Pixelcade LED Marquee Detected on ttyACM1"
         PixelcadePort="/dev/ttyACM1"
         pixelcade_found=true
     else
-       echo "Sorry, Pixelcade LED Marquee was not detected, pleasse ensure Pixelcade is USB connected to your Pi and the toggle switch on the Pixelcade board is pointing towards USB"
+       #echo "Sorry, Pixelcade LED Marquee was not detected, pleasse ensure Pixelcade is USB connected to your Pi and the toggle switch on the Pixelcade board is pointing towards USB"
        pixelcade_found=false
     fi
 fi
@@ -72,7 +72,7 @@ if [[ ! -d "${INSTALLPATH}pixelcade/user-modified-pixelcade-artwork" ]]; then #w
 fi
 
 #find all files that are newer than .initial-date and put them into /ptemp/modified.tgz
-echo "Backing up your artwork modifications..."
+#echo "Backing up your artwork modifications..."
 
 if [[ -f "${INSTALLPATH}pixelcade/system/.initial-date" ]]; then #our initial date stamp file is there
     cd ${INSTALLPATH}pixelcade
@@ -88,24 +88,24 @@ if [[ -f "${INSTALLPATH}pixelcade/system/.initial-date" ]]; then #our initial da
     rm changed.tgz
    #dont' delete the folder because initial date gets reset so we need continusly to track what the user changed during each update in this folder
 else
-    echo "[ERROR] ${INSTALLPATH}pixelcade/system/.initial-date does not exist, any custom or modified artwork you have done will not backup and will be overwritten"
+    #echo "[ERROR] ${INSTALLPATH}pixelcade/system/.initial-date does not exist, any custom or modified artwork you have done will not backup and will be overwritten"
 fi
 
 cd ${INSTALLPATH}
-wget https://github.com/alinke/pixelcade/archive/refs/heads/master.zip
+wget -q https://github.com/alinke/pixelcade/archive/refs/heads/master.zip
 unzip master.zip
-echo "Copying over new artwork..."
+#echo "Copying over new artwork..."
 # not that because of github the file dates of pixelcade-master will be today's date and thus newer than the destination
 # now let's overwrite with the pixelcade repo and because the repo files are today's date, they will be newer and copy over
 rsync -avruh --progress ${INSTALLPATH}pixelcade-master/. ${INSTALLPATH}pixelcade/
 # ok so now copy back in here the files from ptemp
 
 if [[ -f "${INSTALLPATH}pixelcade/system/.initial-date" ]]; then
-   echo "Copying your modified artwork..."
+   #echo "Copying your modified artwork..."
    cp -f -r -v "${INSTALLPATH}pixelcade/user-modified-pixelcade-artwork/." "${INSTALLPATH}pixelcade/"
 fi
 
-echo "Cleaning up, this will take a bit..."
+#echo "Cleaning up, this will take a bit..."
 rm -r ${INSTALLPATH}pixelcade-master
 rm ${INSTALLPATH}master.zip
 
@@ -122,38 +122,38 @@ fi
 cd ${INSTALLPATH}
 
 if uname -m | grep -q 'aarch64'; then
-   echo "${yellow}aarch64 Detected..."
+   #echo "${yellow}aarch64 Detected..."
    aarch64=true
 fi
 
 if uname -m | grep -q 'aarch32'; then
-   echo "${yellow}aarch32 Detected..."
+   #echo "${yellow}aarch32 Detected..."
    aarch32=true
 fi
 
 if uname -m | grep -q 'armv6'; then
-   echo "${yellow}aarch32 Detected..."
+   #echo "${yellow}aarch32 Detected..."
    aarch32=true
 fi
 
 if uname -m | grep -q 'x86'; then
-   echo "${yellow}x86 32-bit Detected..."
+   #echo "${yellow}x86 32-bit Detected..."
    x86_32=true
 fi
 
 if uname -m | grep -q 'amd64'; then
-   echo "${yellow}x86 64-bit Detected..."
+   #echo "${yellow}x86 64-bit Detected..."
    x86_64=true
 fi
 
 if uname -m | grep -q 'x86_64'; then
-   echo "${yellow}x86 64-bit Detected..."
+   #echo "${yellow}x86 64-bit Detected..."
    x86_64=true
    x86_32=false
 fi
 
 if cat /proc/device-tree/model | grep -q 'Raspberry Pi 3'; then
-   echo "${yellow}Raspberry Pi 3 detected..."
+   #echo "${yellow}Raspberry Pi 3 detected..."
    pi3=true
 fi
 
@@ -172,14 +172,14 @@ if cat /proc/device-tree/model | grep -q 'ODROID-N2'; then
    odroidn2=true
 fi
 
-echo "Installing Pixelcade Software..."
+#echo "Installing Pixelcade Software..."
 
 if [[ -f "${INSTALLPATH}master.zip" ]]; then #if the user killed the installer mid-stream,it's possible this file is still there so let's remove it to be sure before downloading, otherwise wget will download and rename to .1
    rm "${INSTALLPATH}master.zip"
 fi
 
 if [ ${PIXELCADE_PRESENT} == "false" ]; then  #skip this if the user already had pixelcade installed
-    wget https://github.com/alinke/pixelcade/archive/refs/heads/master.zip
+    wget -q https://github.com/alinke/pixelcade/archive/refs/heads/master.zip
     unzip master.zip
     mv pixelcade-master pixelcade
 fi
@@ -189,27 +189,25 @@ JDKDEST="${INSTALLPATH}pixelcade/jdk"
 
 if [[ ! -d $JDKDEST ]]; then #does Java exist already
     if [[ $aarch64 == "true" ]]; then
-          echo "${yellow}Installing Java JRE 11 64-Bit for aarch64...${white}" #these will unzip and create the jdk folder
+          #echo "${yellow}Installing Java JRE 11 64-Bit for aarch64...${white}" #these will unzip and create the jdk folder
           curl -kLO https://github.com/alinke/pixelcade-jre/raw/main/jdk-aarch64.zip #this is a 64-bit small JRE , same one used on the ALU
           unzip jdk-aarch64.zip
           chmod +x ${INSTALLPATH}pixelcade/jdk/bin/java
     elif [ "$aarch32" == "true" ]; then
-          echo "${yellow}Installing Java JRE 11 32-Bit for aarch32...${white}"
+          #echo "${yellow}Installing Java JRE 11 32-Bit for aarch32...${white}"
           curl -kLO https://github.com/alinke/pixelcade-jre/raw/main/jdk-aarch32.zip
           unzip jdk-aarch32.zip
           chmod +x ${INSTALLPATH}pixelcade/jdk/bin/java
     elif [ "$x86_32" == "true" ]; then #pi zero is arm6 and cannot run the normal java :-( so have to get this special one
-          echo "${yellow}Installing Java JRE 11 32-Bit for X86...${white}"
+          #echo "${yellow}Installing Java JRE 11 32-Bit for X86...${white}"
           curl -kLO https://github.com/alinke/pixelcade-jre/raw/main/jdk-x86-32.zip
           unzip jdk-x86-32.zip
           chmod +x ${INSTALLPATH}pixelcade/jdk/bin/java
     elif [ "$x86_64" == "true" ]; then #pi zero is arm6 and cannot run the normal java :-( so have to get this special one
-          echo "${yellow}Installing Java JRE 11 64-Bit for X86...${white}"
+          #echo "${yellow}Installing Java JRE 11 64-Bit for X86...${white}"
           curl -kLO https://github.com/alinke/pixelcade-jre/raw/main/jdk-x86-64.zip
           unzip jdk-x86-64.zip
           chmod +x ${INSTALLPATH}pixelcade/jdk/bin/java
-    else
-      echo "${red}Sorry, do not have a Java JDK for your platform, you'll need to install a Java JDK or JRE manually under /userdata/system/jdk"
     fi
 fi
 
@@ -222,7 +220,7 @@ mkdir ${INSTALLPATH}ptemp
 cd ${INSTALLPATH}ptemp
 
 #get the Pixelcade system files
-wget https://github.com/alinke/pixelcade-linux/archive/refs/heads/main.zip
+wget -q https://github.com/alinke/pixelcade-linux/archive/refs/heads/main.zip
 unzip main.zip
 
 if [[ ! -d ${INSTALLPATH}configs/emulationstation/scripts ]]; then #does the ES scripts folder exist, make it if not
@@ -230,24 +228,24 @@ if [[ ! -d ${INSTALLPATH}configs/emulationstation/scripts ]]; then #does the ES 
 fi
 
 #pixelcade core files
-echo "${yellow}Installing Pixelcade Core Files...${white}"
+#echo "${yellow}Installing Pixelcade Core Files...${white}"
 cp -f ${INSTALLPATH}ptemp/pixelcade-linux-main/core/* ${INSTALLPATH}pixelcade #the core Pixelcade files, no sub-folders in this copy
 #pixelcade system folder
 cp -a -f ${INSTALLPATH}ptemp/pixelcade-linux-main/system ${INSTALLPATH}pixelcade #system folder, .initial-date will go in here
 #pixelcade scripts for emulationstation events
 #copy over the custom scripts
-echo "${yellow}Installing Pixelcade EmulationStation Scripts...${white}"
+#echo "${yellow}Installing Pixelcade EmulationStation Scripts...${white}"
 cp -r -f ${INSTALLPATH}ptemp/pixelcade-linux-main/batocera/scripts ${INSTALLPATH}configs/emulationstation #note this will overwrite existing scripts
 find ${INSTALLPATH}configs/emulationstation/scripts -type f -iname "*.sh" -exec chmod +x {} \; #make all the scripts executble
 #hi2txt for high score scrolling
-echo "${yellow}Installing hi2txt for High Scores...${white}"
+#echo "${yellow}Installing hi2txt for High Scores...${white}"
 cp -r -f ${INSTALLPATH}ptemp/pixelcade-linux-main/hi2txt ${INSTALLPATH}pixelcade #for high scores
 
 # set the Batocera logo as the startup marquee
 sed -i 's/startupLEDMarqueeName=arcade/startupLEDMarqueeName=batocera/' ${INSTALLPATH}pixelcade/settings.ini
 
 if [[ $odroidn2 == "true" || "$x86_64" == "true" || "$x86_32" == "true" ]]; then
-    echo "${yellow}Setting Pixelcade Explicit Port for Odroid N2 or X86...${white}"
+    #echo "${yellow}Setting Pixelcade Explicit Port for Odroid N2 or X86...${white}"
     sed -i "s|port=COM99|port=${PixelcadePort}|" "${INSTALLPATH}pixelcade/settings.ini"
 fi
 # need to remove a few lines in console.csv
@@ -263,17 +261,17 @@ if [[ ! -f ${INSTALLPATH}custom.sh ]]; then #custom.sh is not there so let's use
     fi
 else      #custom.sh is already there so just add pixelcade startup to it
   if cat ${INSTALLPATH}custom.sh | grep -q 'pixelcade'; then   #pixelcade mod already there, let's skip
-      echo "Pixelcade was already added to custom.sh, skipping..."
+      #echo "Pixelcade was already added to custom.sh, skipping..."
   else
-      echo "Adding Pixelcade Listener auto start to custom.sh ..."
+      #echo "Adding Pixelcade Listener auto start to custom.sh ..."
       if [[ $odroidn2 == "true" || "$x86_64" == "true" || "$x86_32" == "true" ]]; then
           cp ${INSTALLPATH}ptemp/pixelcade-linux-main/batocera/odroidn2/auto/custom.sh ${INSTALLPATH}pixelcade/system/autostart.sh
           chmod +x ${INSTALLPATH}pixelcade/system/autostart.sh
-          echo "/bin/sh ${INSTALLPATH}pixelcade/system/autostart.sh" >> ${INSTALLPATH}custom.sh #append pixelcade's autostart.sh to the existing custom.sh
+          #echo "/bin/sh ${INSTALLPATH}pixelcade/system/autostart.sh" >> ${INSTALLPATH}custom.sh #append pixelcade's autostart.sh to the existing custom.sh
       else
           cp ${INSTALLPATH}ptemp/pixelcade-linux-main/batocera/auto/custom.sh ${INSTALLPATH}pixelcade/system/autostart.sh
           chmod +x ${INSTALLPATH}pixelcade/system/autostart.sh
-          echo "/bin/sh ${INSTALLPATH}pixelcade/system/autostart.sh" >> ${INSTALLPATH}custom.sh #append pixelcade's autostart.sh to the existing custom.sh
+          #echo "/bin/sh ${INSTALLPATH}pixelcade/system/autostart.sh" >> ${INSTALLPATH}custom.sh #append pixelcade's autostart.sh to the existing custom.sh
       fi
   fi
 fi
@@ -282,11 +280,11 @@ chmod +x ${INSTALLPATH}custom.sh
 
 cd ${INSTALLPATH}pixelcade
 
-echo "Checking for Pixelcade LCDs..."
+#echo "Checking for Pixelcade LCDs..."
 #${INSTALLPATH}pixelcade/jdk/bin/java -jar pixelcadelcdfinder.jar -nogui #check for Pixelcade LCDs
 
 if [[ $pixelcade_found == "true" ]]; then #only run pixelcade if the hardware is there
-  echo "Pixelcade hardware is detected so let's start Pixelcade now"
+  #echo "Pixelcade hardware is detected so let's start Pixelcade now"
   if [[ $odroidn2 == "true" || "$x86_64" == "true" || "$x86_32" == "true" ]]; then #start up work around for Odroid N2 or X86 64 bit
     #source ${INSTALLPATH}custom.sh
     #if [ $? -eq 0 ]; then
@@ -315,9 +313,9 @@ if [[ $pixelcade_found == "true" ]]; then #only run pixelcade if the hardware is
 fi
 
 #let's write the version so the next time the user can try and know if he/she needs to upgrade
-echo $version > ${INSTALLPATH}pixelcade/pixelcade-version
+#echo $version > ${INSTALLPATH}pixelcade/pixelcade-version
 
-echo "Cleaning Up..."
+#echo "Cleaning Up..."
 cd ${INSTALLPATH}
 
 if [[ -f master.zip ]]; then
@@ -344,12 +342,12 @@ if [[ -d ${INSTALLPATH}ptemp ]]; then
     rm -r ${INSTALLPATH}ptemp
 fi
 
-echo ""
-echo "**** INSTALLATION COMPLETE ****"
+#echo ""
+#echo "**** INSTALLATION COMPLETE ****"
 install_succesful=true
 touch ${INSTALLPATH}pixelcade/system/.initial-date
 
-echo " "
-echo "INSTALLATION COMPLETE , please now reboot and then Pixelcade will be controlled by Batocera"
+#echo " "
+#echo "INSTALLATION COMPLETE , please now reboot and then Pixelcade will be controlled by Batocera"
 
 killall java
