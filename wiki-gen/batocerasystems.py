@@ -6,6 +6,7 @@ from hashlib import md5
 from os.path import isfile
 from collections import OrderedDict
 import sys
+import zipfile
 
 systems = {
 
@@ -270,6 +271,318 @@ systems = {
     # ---------- Zelda Classic ---------- #
     "zc210":   { "name": "Zelda Classic", "biosFiles":  [ { "md5": "033d7392985841027909c4c32b9f2076", "file": "bios/zcdata.data"  },
                                                   { "md5": "e0ba7a8634b12cfee4b6760a6f89051a", "file": "bios/zcsf.sf2" } ] },
+    # ---------- Apple Mac ---------- #
+    "macintosh":   { "name": "Apple Macintosh", "biosFiles":  [ { "md5": "66223be1497460f1e60885eeb35e03cc", "file": "bios/MacII.ROM"  },
+                                                  { "md5": "2a8a4c7f2a38e0ab0771f59a9a0f1ee4", "file": "bios/MacIIx.ROM" },
+                                                  { "md5": "", "file": "bios/mac128k.zip" },
+                                                  { "md5": "bc04a4252ee96826c1f41f927c145225", "zippedFile": "342-0220-a.u6d", "file": "bios/mac128k.zip"},
+                                                  { "md5": "409d8b9a04db15b7bfbbd5fcb931bf2e", "zippedFile": "342-0221-a.u8d", "file": "bios/mac128k.zip"},
+                                                  { "md5": "", "file": "bios/mackbd_m0110.zip" },
+                                                  { "md5": "9d09a9a51c9ef3ea5719e19db22e7901", "zippedFile": "ip8021h_2173.bin", "file": "bios/mackbd_m0110.zip"},
+                                                  { "md5": "", "file": "bios/mackbd_m0120.zip" },
+                                                  { "md5": "9d09a9a51c9ef3ea5719e19db22e7901", "zippedFile": "ip8021h_2173.bin", "file": "bios/mackbd_m0120.zip"},
+                                                  { "md5": "", "file": "bios/mac512k.zip" },
+                                                  { "md5": "b4118b89fa68a913a225f0cf9a751fae", "zippedFile": "342-0220-b.u6d", "file": "bios/mac512k.zip"},
+                                                  { "md5": "ab4e461833e98ef7106f24455a07769d", "zippedFile": "342-0221-b.u8d", "file": "bios/mac512k.zip"},
+                                                  { "md5": "", "file": "bios/macplus.zip" },
+                                                  { "md5": "1467a42dee57ac265d063b3f351189fc", "zippedFile": "342-0341-a.u6d", "file": "bios/macplus.zip"},
+                                                  { "md5": "25b1bf85b3b072d957499cef4d7e313f", "zippedFile": "342-0341-b.u6d", "file": "bios/macplus.zip"},
+                                                  { "md5": "cf7c3259844245a8967556fa40d81243", "zippedFile": "342-0341-c.u6d", "file": "bios/macplus.zip"},
+                                                  { "md5": "d5584762b43a9b1cb24a981f9b9b4198", "zippedFile": "342-0342-a.u8d", "file": "bios/macplus.zip"},
+                                                  { "md5": "f83069fd7ff1fb011958f819cbff4c88", "zippedFile": "342-0342-b.u8d", "file": "bios/macplus.zip"},
+                                                  { "md5": "875919e2544644cd628f44b5c11db036", "zippedFile": "modplus-harp2.bin", "file": "bios/macplus.zip"},
+                                                  { "md5": "efcefe8f11c10541a503d48a07878201", "zippedFile": "rominator-20150225-hi.bin", "file": "bios/macplus.zip"},
+                                                  { "md5": "f4b06da98500df0747a764dfbf1862b9", "zippedFile": "rominator-20150225-lo.bin", "file": "bios/macplus.zip"},
+                                                  { "md5": "", "file": "bios/macse.zip" },
+                                                  { "md5": "9fb38bdcc0d53d9d380897ee53dc1322", "zippedFile": "macse.rom", "file": "bios/macse.zip"},
+                                                  { "md5": "", "file": "bios/macclasc.zip" },
+                                                  { "md5": "c229bb677cb41b84b780c9e38a09173e", "zippedFile": "341-0813__=c=1983-90_apple__japan__910d_d.27c4096_be.ue1", "file": "bios/macclasc.zip"},
+                                                  { "md5": "", "file": "bios/mac2fdhd.zip" },
+                                                  { "md5": "2a8a4c7f2a38e0ab0771f59a9a0f1ee4", "zippedFile": "97221136.rom", "file": "bios/mac2fdhd.zip"},
+                                                  { "md5": "", "file": "bios/nb_48gc.zip" },
+                                                  { "md5": "1bf16eefb23a1bea02f031f1ef1de528", "zippedFile": "3410801.bin", "file": "bios/nb_48gc.zip"},
+                                                  { "md5": "", "file": "bios/maciix.zip" },
+                                                  { "md5": "2a8a4c7f2a38e0ab0771f59a9a0f1ee4", "zippedFile": "97221136.rom", "file": "bios/maciix.zip"},
+                                                  { "md5": "", "file": "bios/maclc3.zip" },
+                                                  { "md5": "fa16d49527c4e6e9c0d9e46904133d39", "zippedFile": "ecbbc41c.rom", "file": "bios/maclc3.zip"},
+                                                  { "md5": "", "file": "bios/mackbd_m0110a.zip" },
+                                                  { "md5": "9e8ea1552153c5e0f895e247e7d3ec1c", "zippedFile": "341-0332-a.bin", "file": "bios/mackbd_m0110a.zip"},
+                                                  { "md5": "", "file": "bios/nb_image.zip" },
+                                                  { "md5": "93155ac7bad0fec36837252bb1e408f2", "zippedFile": "nb_fake.bin", "file": "bios/nb_image.zip"},
+                                                  { "md5": "", "file": "bios/egret.zip" },
+                                                  { "md5": "96665499f5cf2bb5b4aae6fdaf0a9fb5", "zippedFile": "341s0850.bin", "file": "bios/egret.zip"},
+                                                  { "md5": "b955ecbdf6d2f979f3683dd1d6884643", "zippedFile": "341s0851.bin", "file": "bios/egret.zip"},
+                                                  { "md5": "5035d321c5d5fa1eab5ce6bf986676e4", "zippedFile": "344s0100.bin", "file": "bios/egret.zip"},
+                                                  { "md5": "", "file": "bios/macos3.img" },
+                                                  { "md5": "", "file": "bios/macos608.img" },
+                                                  { "md5": "", "file": "bios/macos701.img" },
+                                                  { "md5": "", "file": "bios/macos75.img" },
+                                                  { "md5": "", "file": "bios/mac608.chd" },
+                                                  { "md5": "", "file": "bios/mac701.chd" },
+                                                  { "md5": "", "file": "bios/mac755.chd" } ] },
+
+    # ---------- Tandy Color Conputer ---------- #
+    "coco":   { "name": "Tandy Color Computer", "biosFiles":  [ { "md5": "", "file": "bios/coco.zip"  },
+                                                { "md5": "a74f3d95b395dad7cdca19d560eeea74", "zippedFile": "bas10.rom", "file": "bios/coco.zip"},
+                                                { "md5": "", "file": "bios/coco2.zip" },
+                                                { "md5": "c933316c7d939532a13648850c1c2aa6", "zippedFile": "bas12.rom", "file": "bios/coco2.zip"},
+                                                { "md5": "21070aa0496142b886c562bf76d7c113", "zippedFile": "extbas11.rom", "file": "bios/coco2.zip"},
+                                                { "md5": "", "file": "bios/coco2b.zip"  },
+                                                { "md5": "c2fc43556eb6b7b25bdf5955bd9df825", "zippedFile": "bas13.rom", "file": "bios/coco2b.zip"},
+                                                { "md5": "21070aa0496142b886c562bf76d7c113", "zippedFile": "extbas11.rom", "file": "bios/coco2.zip"},
+                                                { "md5": "", "file": "bios/coco3.zip"  },
+                                                { "md5": "7233c6c429f3ce1c7392f28a933e0b6f", "zippedFile": "coco3.rom", "file": "bios/coco3.zip"},
+                                                { "md5": "", "file": "bios/coco3p.zip"  },
+                                                { "md5": "4ae57e5a8e7494e5485446fefedb580b", "zippedFile": "coco3p.rom", "file": "bios/coco3p.zip"},
+                                                { "md5": "", "file": "bios/coco_fdc_v11.zip"  },
+                                                { "md5": "8cab28f4b7311b8df63c07bb3b59bfd5", "zippedFile": "disk11.rom", "file": "bios/coco_fdc_v11.zip"} ] },
+
+    # ---------- Tomy Tutor ---------- #
+    "tutor":   { "name": "Tomy Tutor", "biosFiles":  [ { "md5": "", "file": "bios/tutor.zip"  },
+                                                { "md5": "196ba41dd1184fe754390534cc273116", "zippedFile": "tutor1.bin", "file": "bios/tutor.zip"},
+                                                { "md5": "5770834c10946ac2c3617504ba530884", "zippedFile": "tutor2.bin", "file": "bios/tutor.zip"} ] },
+
+    # ---------- TI-99 ---------- #
+    "ti99":   { "name": "Texas Instruments TI-99", "biosFiles":  [ { "md5": "", "file": "bios/ti99_4a.zip"  },
+                                                { "md5": "9bb51dfab49b9a7cf832cc1fb6f203e6", "zippedFile": "994a_grom0.u500", "file": "bios/ti99_4a.zip"},
+                                                { "md5": "7f1864c3dac31c86e2ae6ce43ccead07", "zippedFile": "994a_grom1.u501", "file": "bios/ti99_4a.zip"},
+                                                { "md5": "a1f77a07243a334e13509a89bff944f2", "zippedFile": "994a_grom2.u502", "file": "bios/ti99_4a.zip"},
+                                                { "md5": "6f495eef767b3f2821a2ec32d0047891", "zippedFile": "994a_rom_hb.u610", "file": "bios/ti99_4a.zip"},
+                                                { "md5": "0dcb961cf84c69b2171a565427c7c6c7", "zippedFile": "994a_rom_lb.u611", "file": "bios/ti99_4a.zip"},
+                                                { "md5": "", "file": "bios/ti99_speech.zip"  },
+                                                { "md5": "491c1195f6345cb6b725096b69d81ec9", "zippedFile": "cd2325a.u2a", "file": "bios/ti99_speech.zip"},
+                                                { "md5": "206daf498ac5d0141de1d47d38afd899", "zippedFile": "cd2326a.u2b", "file": "bios/ti99_speech.zip"} ] },
+
+    # ---------- Bally Astrocade ---------- #
+    "astrocde":   { "name": "Bally Astrocade", "biosFiles":  [ { "md5": "", "file": "bios/astrocde.zip"  },
+                                                { "md5": "7d25a26e5c4841b364cfe6b1735eaf03", "zippedFile": "astro.bin", "file": "bios/astrocde.zip"}, ] },
+
+    # ---------- Game Master ---------- #
+    "gmaster":   { "name": "Hartung Game Master", "biosFiles":  [ { "md5": "", "file": "bios/gmaster.zip"  },
+                                                { "md5": "6bff08b5e5f96de405cd56d5f04a08f8", "zippedFile": "d78c11agf_e19.u1", "file": "bios/gmaster.zip"}, ] },
+
+    # ---------- Coleco Adam ---------- #
+    "adam":   { "name": "Coleco Adam", "biosFiles":  [ { "md5": "", "file": "bios/adam.zip"  },
+                                                { "md5": "01bba3bcd46d8a586dd6ec555accc133", "zippedFile": "alf @1 rev 57 e3d5.u8", "file": "bios/adam.zip"},
+                                                { "md5": "feabe33e8f2dab88da1458b4d27f3faa", "zippedFile": "alf @2 rev 57 ae6a.u20", "file": "bios/adam.zip"},
+                                                { "md5": "a720bc872a772ed471fac14e36ec8bcb", "zippedFile": "alf @3 rev 57 8534.u21", "file": "bios/adam.zip"},
+                                                { "md5": "cf10b154f2e006a9740d7653cfc47cab", "zippedFile": "eos 6 rev 57 08dd.u22", "file": "bios/adam.zip"},
+                                                { "md5": "7916bb9635d502366326ec39aea5fc89", "zippedFile": "master rev a 174b.u6", "file": "bios/adam.zip"},
+                                                { "md5": "2c66f5911e5b42b8ebe113403548eee7", "zippedFile": "os7.u2", "file": "bios/adam.zip"},
+                                                { "md5": "4fe4f6800076ea3d897d4285653447bd", "zippedFile": "wp_r80.rom", "file": "bios/adam.zip"},                                                
+                                                { "md5": "", "file": "bios/adam_ddp.zip" },
+                                                { "md5": "0423e9e9bf5036aa1e9d656b6a1f842c", "zippedFile": "tape rev a 8865.u24", "file": "bios/adam_ddp.zip"},
+                                                { "md5": "", "file": "bios/adam_fdc.zip" },
+                                                { "md5": "ae12d0b83832b059cb6cb43029bbfdb3", "zippedFile": "1440k micro innovations hd-dd.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "4c38a7df1e645c8d9f417bf7165c46d0", "zippedFile": "320ta.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "afea14c826f3cfbc89b76725a4a41951", "zippedFile": "a720dipi 7607 mmsg =c= 1988.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "976d2a7d85319d9104bc9ec176fbfa9c", "zippedFile": "adam disk u10 ad 31 rev a 09-27-84.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "29569dc029e95e48907b3c81d636987f", "zippedFile": "dbl2-4.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "a121855c20a638429bbfcf0448349515", "zippedFile": "doug.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "e05ababa16e2d5cb92b678cb6e6e2004", "zippedFile": "fastpack 720a,t.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "a1a2a353dea4b8769a2da733822abfdc", "zippedFile": "pmhdfdc.u10", "file": "bios/adam_fdc.zip"},
+                                                { "md5": "", "file": "bios/adam_kb.zip" },
+                                                { "md5": "d81e0b2bb6b98999541c5f40b489e88f", "zippedFile": "keyboard.u2", "file": "bios/adam_kb.zip"},
+                                                { "md5": "", "file": "bios/adam_prn.zip" },
+                                                { "md5": "3cdf2fe48ac4224b56f26c03f6c68982", "zippedFile": "printer.u2", "file": "bios/adam_prn.zip"}, ] },
+
+     # ---------- BBC Micro ---------- #
+    "bbc":   { "name": "BBC Micro", "biosFiles":  [ { "md5": "", "file": "bios/bbcb.zip"  },
+                                                { "md5": "521a197d3623682825f1042c1350feb4", "zippedFile": "basic1.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "2cc67be4624df4dc66617742571a8e3d", "zippedFile": "basic2.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "0cad3d0cf0d111aca2b158b9b605913f", "zippedFile": "os01.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "46f920a170e88bab7faa96cf80b84324", "zippedFile": "os092.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "0199bac73f1dbca291582834a3e61122", "zippedFile": "os10.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "0a59a5ba15fe8557b5f7fee32bbd393a", "zippedFile": "os12.rom", "file": "bios/bbcb.zip"},
+                                                { "md5": "35e9ab10bcf016bd24b4c716add009b9", "zippedFile": "phroma.bin", "file": "bios/bbcb.zip"},
+                                                { "md5": "", "file": "bios/bbc_acorn8271.zip"  },
+                                                { "md5": "803530149c274994fabc6d28cbe03679", "zippedFile": "dfs090.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "5a3ddfae96178e025f27bf1f69bfa629", "zippedFile": "dfs098.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "d636ffb7a80fc29b133d32e4250fbab6", "zippedFile": "dnfs100.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "5daed103918277e2065dd7e8d23e57a5", "zippedFile": "dnfs120.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "79b31feacab0b1ccddf358be5dfb6241", "zippedFile": "wedfs130.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "24458ace9566a01d255bca16b46a960d", "zippedFile": "wedfs141.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "6e9356d0a5e7fbabb386824ec370d6f3", "zippedFile": "wedfs142.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "990b8a9755af25452c85f23ceb344be4", "zippedFile": "wedfs143.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "1d250b0242e447e9106e8bfd1f27ea84", "zippedFile": "wedfs144.rom", "file": "bios/bbc_acorn8271.zip"},
+                                                { "md5": "", "file": "bios/saa5050.zip"  },
+                                                { "md5": "8b3c10a2317808ed94d6c6073b5b3327", "zippedFile": "saa5050", "file": "bios/saa5050.zip"},
+                                                { "md5": "", "file": "bios/mame/samples/bbc.zip"  },
+                                                { "md5": "", "zippedFile": "motoroff.wav", "file": "bios/mame/samples/bbc.zip"},
+                                                { "md5": "", "zippedFile": "motoron.wav", "file": "bios/mame/samples/bbc.zip"} ] },
+
+    # ---------- APF M-1000 ---------- #
+    "apfm1000":   { "name": "APF M-1000", "biosFiles":  [ { "md5": "", "file": "bios/apfm1000.zip"  },
+                                                { "md5": "1f4a976350202ee1e32c2b0477c3fc1b", "zippedFile": "apf_4000.rom", "file": "bios/apfm1000.zip"},
+                                                { "md5": "b325543b36d37edf3fc20761f00c7a37", "zippedFile": "mod_bios.bin", "file": "bios/apfm1000.zip"},
+                                                { "md5": "89a7cfa5469ce24773721d65b28f8544", "zippedFile": "trash-ii.bin", "file": "bios/apfm1000.zip"} ] },
+
+    # ---------- Fujitsu FM-7 ---------- #
+    "fm7":   { "name": "Fujitsu FM-7", "biosFiles":  [ { "md5": "", "file": "bios/fm7.zip"  },
+                                                { "md5": "9f9b7d5615ecdbde2cd26e9306ffef13", "zippedFile": "boot_bas.rom", "file": "bios/fm7.zip"},
+                                                { "md5": "18a461ccaf7ef4e8ecad58cecd3a24b3", "zippedFile": "boot_dos_a.rom", "file": "bios/fm7.zip"},
+                                                { "md5": "6a5da0404b7ee338df9002cdcabc3068", "zippedFile": "fbasic300.rom", "file": "bios/fm7.zip"},
+                                                { "md5": "a330817f8f7ced752a7bcc8dfba8fd2e", "zippedFile": "kanji.rom", "file": "bios/fm7.zip"},
+                                                { "md5": "d19ed5923aaae2ec43dffe7a0daa80cb", "zippedFile": "subsys_c.rom", "file": "bios/fm7.zip"},
+                                                { "md5": "", "file": "bios/fm77av.zip" },
+                                                { "md5": "71c96a45b78e88a39cb94c1aabd23d8a", "zippedFile": "fbasic30.rom", "file": "bios/fm77av.zip"},
+                                                { "md5": "e0f4c0ebee60aee83e863826e59ae1de", "zippedFile": "initiate.rom", "file": "bios/fm77av.zip"},
+                                                { "md5": "ae945a6dfb642b0a5d0529737e8ee5cd", "zippedFile": "subsys_a.rom", "file": "bios/fm77av.zip"},
+                                                { "md5": "fb83a1a9725c8432acef0c3ce89492e3", "zippedFile": "subsys_b.rom", "file": "bios/fm77av.zip"},
+                                                { "md5": "7db27dede3e358017d518101850bccfa", "zippedFile": "subsyscg.rom", "file": "bios/fm77av.zip"} ] },
+
+    # ---------- Acorn Archimedes ---------- #
+    "archimedes":   { "name": "Acorn Archimedes", "biosFiles":  [ { "md5": "", "file": "bios/aa310.zip"  },
+                                                { "md5": "374E4BCAA04CB98AAD3B64A1555C3930", "zippedFile": "0270,251-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "B0B6A83029B6F85BB044BFC46BF3F0F6", "zippedFile": "0270,252-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "BF35BB799AA0278B7EE7719DD32F26BC", "zippedFile": "0270,253-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "E41AF081535AAE930D68EE4CBD672513", "zippedFile": "0270,254-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "7ECDCCD760557AB0711EDB37773FAEB6", "zippedFile": "0270,601-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "C43BAD04862EA03146FF5BF7441A1A24", "zippedFile": "0270,602-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "454C1977AD70A206F4F3A0BDCA294D85", "zippedFile": "0270,603-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "6850DA7A70B198EAF6FDE5BE503FA5CD", "zippedFile": "0270,604-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "84D305E248DAB48A3A110AF161DFB005", "zippedFile": "0276,146-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "64D7F085E6AFB149EBC2E7F919429A19", "zippedFile": "0276,147-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "F7D0A9A4D1DAE8EEE057AA626B87715F", "zippedFile": "0276,148-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "763B015D85C7D9D17E06D5BABC0A9D32", "zippedFile": "0276,149-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "B8FCD63C6A28D0C7034AF2E6C5AFF9A8", "zippedFile": "0276,322-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "6265551C5D6336F7DDD9F3FC78CEBA93", "zippedFile": "0276,323-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "CA4379AEAB4F7C7640C8AD34B27A9DB6", "zippedFile": "0276,324-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "358D3C9D2685C076F6A141C26D45520C", "zippedFile": "0276,325-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "4AE429FBF23F8AA64CE2002CFB14C527", "zippedFile": "0277,022-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "83D0F0738468FDF9F23C13EEF22DBEEA", "zippedFile": "0277,023-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "636E4072C392916D2BF00865FEE40984", "zippedFile": "0277,024-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "252B1993FDB66CAC522A0EDBEFFC3407", "zippedFile": "0277,025-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "591F3BDD0F20A0A3D03C8748F2F75754", "zippedFile": "0283,022-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "F77F4A409C78C8495FC3876CD4E7D97C", "zippedFile": "0283,023-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "57D3A349407916F55129D6C8C0F56395", "zippedFile": "0283,024-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "EE4AA1EA0EEBF88C5F6CAE6315ED11A1", "zippedFile": "0283,025-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "A057124502E533CCD8865DC970CF7017", "zippedFile": "0296,041-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "3C40D2821595A7334A46EA3B46A5421D", "zippedFile": "0296,041-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "D1D51B8F603BBA476D1F63BC5980040E", "zippedFile": "0296,042-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "7B096A93CC5ADA80BCFB5249BCA33768", "zippedFile": "0296,042-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "744E80ABE4C6A845412F63A0F0B14E48", "zippedFile": "0296,043-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "9DAC78CBA6034C427D00F78FA94AB63D", "zippedFile": "0296,043-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "4C0B2E1FB29C8ACD84E94D25C953173C", "zippedFile": "0296,044-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "F6BF5F8908A19A9AACF733633B1CD5CF", "zippedFile": "0296,044-02.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "EEC46F5BD4CDB456B760B3CDDF16A33C", "zippedFile": "0296,241-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "980E3BE0C851A59D0F4602F4A94B2EEF", "zippedFile": "0296,242-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "971A49D5C2DBB3FC01C17D1D5615781A", "zippedFile": "0296,243-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "9CE06A4D2A8331BC5B7FADB967D74F4F", "zippedFile": "0296,244-01.rom", "file": "bios/aa310.zip"},
+                                                { "md5": "C74763F720C98E16DC3C6C421DB21485", "zippedFile": "cmos_arthur.bin", "file": "bios/aa310.zip"},
+                                                { "md5": "6F564C8917F04594BDA7385F6DE61061", "zippedFile": "cmos_riscos2.bin", "file": "bios/aa310.zip"},
+                                                { "md5": "232A302EFE19278D9DF6ECBC8EA3DC6C", "zippedFile": "cmos_riscos3.bin", "file": "bios/aa310.zip"},
+                                                { "md5": "", "file": "bios/archimedes_keyboard.zip" },
+                                                { "md5": "1A8617C1ABE3E0729D20CE844E1E12A8", "zippedFile": "acorn_0280,022-01_philips_8051ah-2.bin", "file": "bios/archimedes_keyboard.zip"} ] },
+
+    # ---------- Acorn Atom ---------- #
+    "atom":   { "name": "Acorn Atom", "biosFiles":  [ { "md5": "", "file": "bios/atom.zip"  },
+                                                { "md5": "B7B7F8A608339FA39D44A3BCFA2CC3F0", "zippedFile": "abasic.ic20", "file": "bios/atom.zip"},
+                                                { "md5": "BAA26F458ACF5745388177FFC7368124", "zippedFile": "afloat.ic21", "file": "bios/atom.zip"},
+                                                { "md5": "9627DFB5F8302DB8DD5702DBF7C09F72", "zippedFile": "dosrom.u15", "file": "bios/atom.zip"} ] },
+
+    # ---------- Acorn Electron ---------- #
+    "electron":   { "name": "Acorn Electron", "biosFiles":  [ { "md5": "", "file": "bios/electron.zip"  },
+                                                { "md5": "4688a93aa298b9431c1788c9b90378c8", "zippedFile": "os_basic.ic2", "file": "bios/electron.zip"},
+                                                { "md5": "", "file": "bios/electron64.zip"  },
+                                                { "md5": "2cc67be4624df4dc66617742571a8e3d", "zippedFile": "basic.rom", "file": "bios/electron64.zip"},
+                                                { "md5": "df01cfe5894276de96bbd1c45b7e834c", "zippedFile": "os_300", "file": "bios/electron64.zip"},
+                                                { "md5": "", "file": "bios/electron_plus1.zip"  },
+                                                { "md5": "f3a39227b401a2ce8cdc7e4b7a860aaf", "zippedFile": "plus1.rom", "file": "bios/electron_plus1.zip"},
+                                                { "md5": "", "file": "bios/electron_plus3.zip"  },
+                                                { "md5": "9aa334b4e8f6d7565e6323e0f77110de", "zippedFile": "acp_dfs1770_200.rom", "file": "bios/electron_plus3.zip"},
+                                                { "md5": "83e15ca501899b0d5b2ce3f5ef696069", "zippedFile": "acp_dfs1770_210.rom", "file": "bios/electron_plus3.zip"},
+                                                { "md5": "b60ee811f4b805638478acd5297b16e0", "zippedFile": "adfs.rom", "file": "bios/electron_plus3.zip"},
+                                                { "md5": "62f5e1d3dae3a68d8fe4406a6f603dc3", "zippedFile": "pres_adfs_113.rom", "file": "bios/electron_plus3.zip"},
+                                                { "md5": "5c39baa89fe8a40a5167a53cc5ae7791", "zippedFile": "pres_adfs_115.rom", "file": "bios/electron_plus3.zip"} ] },
+
+    # ---------- Camputers Lynx ---------- #
+    "camplynx":   { "name": "Camputers Lynx", "biosFiles":  [ { "md5": "", "file": "bios/lynx48k.zip"  },
+                                                { "md5": "B0AD5BF3070AEA27B637E1998C81FA8C", "zippedfile": "lynx48-1.ic46", "file": "bios/lynx48k.zip"},
+                                                { "md5": "B665E10211BBDBFAF2DEFB32D5580892", "zippedfile": "lynx48-2.ic45", "file": "bios/lynx48k.zip"},
+                                                { "md5": "BC0760D8BF61C9683270266D259CD2AE", "zippedfile": "lynx4811.ic46", "file": "bios/lynx48k.zip"},
+                                                { "md5": "DDE90A794E5324002A9FD7F79CEC3172", "zippedfile": "lynx4812.ic45", "file": "bios/lynx48k.zip"},
+                                                { "md5": "", "file": "bios/lynx96k.zip" },
+                                                { "md5": "A0A8F136F69B5891D33993627A185697", "zippedfile": "danish96k3.ic44", "file": "bios/lynx96k.zip"},
+                                                { "md5": "FCB706B3BA2BA61F6F7AF1C28F420F94", "zippedfile": "dosrom.rom", "file": "bios/lynx96k.zip"},
+                                                { "md5": "815AFA653B61CBE70936B01AFF700912", "zippedfile": "lynx9644.ic44", "file": "bios/lynx96k.zip"},
+                                                { "md5": "3CCDB9DFE6018892383FCBB1A9167D76", "zippedfile": "lynx9645.ic45", "file": "bios/lynx96k.zip"},
+                                                { "md5": "01A9770EFDAB17F089BBBBE53F5D69FA", "zippedfile": "lynx9646.ic46", "file": "bios/lynx96k.zip"},
+                                                { "md5": "89BA52F683CD79638646874E965476B6", "zippedfile": "skorprom.ic44", "file": "bios/lynx96k.zip"},
+                                                { "md5": "", "file": "bios/lynx128k.zip" },
+                                                { "md5": "FCB706B3BA2BA61F6F7AF1C28F420F94", "zippedfile": "dosrom.rom", "file": "bios/lynx128k.zip"},
+                                                { "md5": "5017FE3A2EA47038AE61E2AEB4F43D65", "zippedfile": "lynx128-1.ic1", "file": "bios/lynx128k.zip"},
+                                                { "md5": "BF69D9538192F65571DBED43DC4A99BB", "zippedfile": "lynx128-2.ic2", "file": "bios/lynx128k.zip"},
+                                                { "md5": "F9F54913CDEDB22BB8F0C549AD121379", "zippedfile": "lynx128-3.ic3", "file": "bios/lynx128k.zip"} ] },
+
+    # ---------- Video Game Music Player ---------- #
+    "vgmplay":   { "name": "Video Game Music Player", "biosFiles":  [ { "md5": "", "file": "bios/qsound.zip"  },
+                                                { "md5": "108b113a596e800a02fece73f784eeb0", "zippedfile": "dl-1425.bin", "file": "bios/qsound.zip"},
+                                                { "md5": "", "file": "bios/ym2413.zip" },
+                                                { "md5": "96c11a92992bdff7f7e9d98a52621e1f", "zippedfile": "ym2413_instruments.bin", "file": "bios/ym2413.zip"},
+                                                { "md5": "", "file": "bios/ym2608.zip" },
+                                                { "md5": "8740932cda05e518a9955f1d08d6786f", "zippedfile": "ym2608_adpcm_rom.bin", "file": "bios/ym2608.zip"} ] },
+
+    # ---------- Epoch Game Pocket Computer ---------- #
+    "gamepock":   { "name": "Epoch Game Pocket Computer", "biosFiles":  [ { "md5": "", "file": "bios/gamepock.zip"  },
+                                                { "md5": "a0dd595eafb407a6a4b4ed800005a394", "zippedFile": "egpcboot.bin", "file": "bios/gamepock.zip"} ] },
+
+    # ---------- Tiger Game.com ---------- #
+    "gamecom":   { "name": "Tiger Game.com", "biosFiles":  [ { "md5": "", "file": "bios/gamecom.zip"  },
+                                                { "md5": "813364d4863b1d7b7b8fd6a97a416bcf", "zippedFile": "external.bin", "file": "bios/gamecom.zip"},
+                                                { "md5": "f7bcefb6daf923c8e5ea2eb69f619efe", "zippedFile": "internal.bin", "file": "bios/gamecom.zip"} ] },
+
+    # ---------- Atari XEGS ---------- #
+    "xegs":   { "name": "Atari XE Game System", "biosFiles":  [ { "md5": "", "file": "bios/xegs.zip"  },
+                                                { "md5": "42CBD989802C17D0AC3731D33270D835", "zippedFile": "c101687.rom", "file": "bios/xegs.zip"} ] },
+
+    # ---------- VTech CreatiVision ---------- #
+    "crvision":   { "name": "VTech CreatiVision", "biosFiles":  [ { "md5": "", "file": "bios/crvision.zip"  },
+                                                { "md5": "3b1ef759d8e3fb4071582efd33dd05f9", "zippedFile": "crvision.u20", "file": "bios/crvision.zip"} ] },
+
+    # ---------- VTech V.Smile ---------- #
+    "vsmile":   { "name": "VTech V.Smile", "biosFiles":  [ { "md5": "", "file": "bios/vsmile.zip"  },
+                                                { "md5": "851FF77A89EC3F4F2793EB4AEDE30E5F", "zippedfile": "vsmile_v100.bin", "file": "bios/vsmile.zip"},
+                                                { "md5": "F41FCC19EBE1E90FA359CD0DF6293FAB", "zippedfile": "vsmile_v102.bin", "file": "bios/vsmile.zip"},
+                                                { "md5": "11E59253C578C8F16EA2375EC398E4E9", "zippedfile": "vsmile_v103.bin", "file": "bios/vsmile.zip"} ] },
+
+    # ---------- VTech Socrates ---------- #
+    "socrates":   { "name": "VTech Socrates", "biosFiles":  [ { "md5": "", "file": "bios/socrates.zip"  },
+                                                { "md5": "0EFAC0C2CC168C0D495E1C4E04EA9F5A", "zippedfile": "27-00817-000-000.u1", "file": "bios/socrates.zip"},
+                                                { "md5": "99AF124AA300ECD44F5DC9D5A2599778", "zippedfile": "speech_eng_internal.bin", "file": "bios/socrates.zip"},
+                                                { "md5": "7046C2B27F51C9A5D33B4D6103F29ACF", "zippedfile": "speech_eng_vsm1.bin", "file": "bios/socrates.zip"},
+                                                { "md5": "6878302C362321EEEE7E40D285CF7D30", "zippedfile": "speech_eng_vsm2.bin", "file": "bios/socrates.zip"},
+                                                { "md5": "31C29C57E3D3E6788BA5817EAAA8B17A", "zippedfile": "speech_eng_vsm3.bin", "file": "bios/socrates.zip"} ] },
+
+    # ---------- Entex Aventure Vision ---------- #
+    "advision":   { "name": "Entex Adventure Vision", "biosFiles":  [ { "md5": "", "file": "bios/advision.zip"  },
+                                                { "md5": "5729638bd856c475678467a353bd921c", "zippedFile": "b225__ins8048-11kdp_n.u5", "file": "bios/advision.zip"},
+                                                { "md5": "fc5e71445e4947a9d00eedbc66b13a8f", "zippedFile": "b8223__cop411l-kcn_n.u8", "file": "bios/advision.zip"} ] },
+
+    # ---------- Bitcorp Gamate ---------- #
+    "gamate":   { "name": "Bitcorp Gamate", "biosFiles":  [ { "md5": "", "file": "bios/gamate.zip"  },
+                                                { "md5": "b411167df6dd563111729296f4c547f6", "zippedFile": "gamate_bios_bit.bin", "file": "bios/gamate.zip"},
+                                                { "md5": "ef67993a94503c4b7798b5901c7dda52", "zippedFile": "gamate_bios_umc.bin", "file": "bios/gamate.zip"} ] },
+
+    # ---------- Phillips CD-i ---------- #
+    "cdi":   { "name": "Phillips CD-i", "biosFiles":  [ { "md5": "", "file": "bios/cdimono1.zip"  },
+                                                { "md5": "2969341396aa61e0143dc2351aaa6ef6", "zippedFile": "cdi200.rom", "file": "bios/cdimono1.zip"},
+                                                { "md5": "ac80a92c988ce07fbd6a8f21ded34cf1", "zippedFile": "cdi220.rom", "file": "bios/cdimono1.zip"},
+                                                { "md5": "ac0d468be366779c9df633be98da250a", "zippedFile": "cdi220b.rom", "file": "bios/cdimono1.zip"},
+                                                { "md5": "3e59b8a9a423d3ecd612a32fe4e2d748", "zippedFile": "zx405037p__cdi_servo_2.1__b43t__llek9215.mc68hc705c8a_withtestrom.7201", "file": "bios/cdimono1.zip"},
+                                                { "md5": "3d20cf7550f1b723158b42a1fd5bac62", "zippedFile": "zx405042p__cdi_slave_2.0__b43t__zzmk9213.mc68hc705c8a_withtestrom.7206", "file": "bios/cdimono1.zip"} ] },
+    
+    # ---------- Naomi 2 ---------- #
+    "naomi2":   { "name": "Naomi 2", "biosFiles":  [ { "md5": "fc7c2b9363a1e21b9ad42003e165598c", "file": "bios/naomi2.zip"  } ] },
+
+    # ---------- Hikaru ---------- #
+    "hikaru":   { "name": "Hikaru", "biosFiles":  [ { "md5": "aac601811a25d7b31a3d5f3f1f82f338", "file": "bios/hikaru.zip" },
+                                                { "md5": "e95415b161121bef35ade12367138c63", "file": "bios/mie.zip"} ] },
+
+    # ---------- GCE Vectrex ---------- #
+    "vectrex":   { "name": "GCE Vectrex", "biosFiles":  [ { "md5": "", "file": "bios/vectrex.zip"  },
+                                                { "md5": "ab082fa8c8e632dd68589a8c7741388f", "zippedFile": "exec_rom.bin", "file": "bios/vectrex.zip"},
+                                                { "md5": "a9c238473229912eb757ff3dfe6f4631", "zippedFile": "exec_rom_intl_284001-1.bin", "file": "bios/vectrex.zip"} ] },
 }
 
 class BiosStatus:
@@ -283,17 +596,46 @@ def md5sum(filename, blocksize=65536):
             hash.update(block)
     return hash.hexdigest()
 
+def checkInsideZip(container, fileName, md5sum):
+    # Check inside Zip files
+    archive = zipfile.ZipFile(container)
+    blocksize = 1024**2  #1M chunks
+    for fname in archive.namelist():
+        # Only check if the file matches
+        if fname.casefold() == fileName.casefold():
+            if md5sum == "":
+                return True
+            entry = archive.open(fname)
+            hash = md5()
+            while True:
+                block = entry.read(blocksize)
+                if not block:
+                    break
+                hash.update(block)
+                if hash.hexdigest() == md5sum:
+                    return True
+                else:
+                    return False
+    # File was not found in zip.
+    return False
+
 def checkBios(systems, prefix):
     missingBios = {}
     for system in systems.keys():
         for file in systems[system]["biosFiles"]:
             filepath = prefix + "/" + file["file"]
             if isfile(filepath):
-                md5 = md5sum(filepath)
-                if md5 != file["md5"] and file["md5"] != "":
-                    if system not in missingBios:
-                        missingBios[system] = {}
-                    missingBios[system][file["file"]] = { "status": BiosStatus.UNTESTED, "md5": file["md5"], "file": file["file"] }
+                if not "zippedFile" in file:
+                    md5 = md5sum(filepath)
+                    if md5 != file["md5"] and file["md5"] != "":
+                        if system not in missingBios:
+                            missingBios[system] = {}
+                        missingBios[system][file["file"]] = { "status": BiosStatus.UNTESTED, "md5": file["md5"], "file": file["file"] }
+                else:
+                    if not checkInsideZip(filepath, file["zippedFile"], file["md5"]):
+                        if system not in missingBios:
+                            missingBios[system] = {}
+                        missingBios[system][file["file"]] = { "status": BiosStatus.UNTESTED, "md5": file["md5"], "file": file["file"] }
             else:
                 if system not in missingBios:
                     missingBios[system] = {}
