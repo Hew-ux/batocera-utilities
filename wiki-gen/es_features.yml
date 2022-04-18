@@ -71,7 +71,7 @@ shared:
         "On":  1
         "Off": 0
     hud:
-      archs_exclude: [s905]
+      archs_exclude: [s905 rpi1 rpi2 rpizero2]
       prompt:      HEADS UP DISPLAY
       description: Show context-sensitive info over the game.
       submenu: DECORATIONS
@@ -175,19 +175,26 @@ shared:
       choices:
         "On": 1
         "Off": 0
+    video_threaded:
+      submenu:     LATENCY REDUCTION
+      prompt:      THREADED VIDEO
+      description: Improves performance at the cost of latency and more video stuttering.
+      choices:
+        "On": 1
+        "Off": 0
 
 global:
-  shared: [videomode, ratio, shaderset, smooth, integerscale, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo, ai_service_enabled, ai_target_lang, ai_service_url, ai_service_pause, rewind, runahead, secondinstance, video_frame_delay_auto, vrr_runloop_enable]
+  shared: [videomode, ratio, shaderset, smooth, integerscale, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo, ai_service_enabled, ai_target_lang, ai_service_url, ai_service_pause, rewind, runahead, secondinstance, video_frame_delay_auto, vrr_runloop_enable, video_threaded]
 
 libretro:
-  shared: [videomode, ratio, shaderset, smooth, integerscale, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo, ai_service_enabled, ai_target_lang, ai_service_url, ai_service_pause, integerscale, runahead, secondinstance, video_frame_delay_auto, vrr_runloop_enable]
+  shared: [videomode, ratio, shaderset, smooth, integerscale, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo, ai_service_enabled, ai_target_lang, ai_service_url, ai_service_pause, integerscale, runahead, secondinstance, video_frame_delay_auto, vrr_runloop_enable, video_threaded]
   cfeatures:
     gfxbackend:
       archs_include: [x86, x86_64, rpi4, rk3326]
       prompt:      GRAPHICS API
       description: Choose which graphics API library to use. Vulkan may not work for every core.
       choices:
-        "OpenGL": opengl
+        "OpenGL": gl
         "GLCore": glcore
         "Vulkan": vulkan
     audio_latency:
@@ -202,13 +209,6 @@ libretro:
         "32":     32
         "16":     16
         "8":      8
-    video_threaded:
-        group: ADVANCED OPTIONS
-        prompt:      THREADED VIDEO
-        description: Improves performance at the cost of latency and more video stuttering.
-        choices:
-            "On":   "true"
-            "Off":  "false"
     video_allow_rotate:
         group: ADVANCED OPTIONS
         prompt:      ALLOW ROTATION
@@ -409,6 +409,100 @@ libretro:
                     "400%":  400%
                     "500%":  500%
                     "1000%": 1000%
+    mesen:
+      features: [netplay, padtokeyboard]
+      shared: [rewind, autosave]
+      cfeatures:
+        mesen_region:
+          prompt:      CONSOLE REGION
+          description: Dendy is a popular Russian clone with unique characteristics.
+          choices:
+            "NTSC":    NTSC
+            "PAL":     PAL
+            "Dendy":   Dendy
+        mesen_screenrotation:
+          prompt:      DISPLAY ROTATION
+          description: Rotate the screen, useful for certain vertical gameplay homebrews.
+          choices:
+            "None":        None
+            "90 degrees":  90 degrees
+            "180 degrees": 180 degrees
+            "270 degrees": 270 degrees
+        mesen_ntsc_filter:
+          prompt:      NTSC FILTER
+          description: Core-powered video filter. Bisqwit filters are CPU heavy.
+          choices:
+            "Disabled":            Disabled
+            "Composite (Blargg)":  Composite (Blargg)
+            "S-Video (Blargg)":    S-Video (Blargg)
+            "RGB (Blargg)":        RGB (Blargg)
+            "Monochrome (Blargg)": Monochrome (Blargg)
+            "Bisqwit 2x":          Bisqwit 2x
+            "Bisqwit 4x":          Bisqwit 4x
+            "Bisqwit 8x":          Bisqwit 8x
+        mesen_nospritelimit:
+          prompt:      REDUCE SPRITE FLICKERING
+          description: Enhancement. Remove the eight sprite per line limit.
+          choices:
+            "Off": Off
+            "On":  On
+        mesen_palette:
+          prompt:      COLOR PALETTE
+          choices:
+            "Default":                        Default
+            "Composite Direct (FirebrandX)":  Composite Direct (by FirebrandX)
+            "Nes Classic":                    Nes Classic
+            "Nestopia (RGB)":                 Nestopia (RGB)
+            "Original Hardware (FirebrandX)": Original Hardware (by FirebrandX)
+            "PVM Style (FirebrandX)":         PVM Style (by FirebrandX)
+            "Sony CXA2025AS":                 Sony CXA2025AS
+            "Unsaturated v6 (FirebrandX)":    Unsaturated v6 (by FirebrandX)
+            "YUV v3 (Firebrand)":             YUV v3 (by FirebrandX)
+            "Custom":                         Custom
+        mesen_hdpacks:
+          prompt:      LOAD CUSTOM TEXTURES
+          description: For use with HD texture packs.
+          choices:
+            "Off": Off
+            "On":  On
+        mesen_fdsautoinsertdisk:
+          prompt:      (FDS) AUTOMATICALLY LOAD DISK SIDE A
+          description: Avoids having to manually load side A every time.
+          choices:
+            "Off": Off
+            "On":  On
+        mesen_fdsfastforwardload:
+          group: ADVANCED OPTIONS
+          prompt:      (FDS) FAST FORWARD DISK LOADING
+          description: Reduce load time at the cost of accuracy.
+          choices:
+            "Off": Off
+            "On":  On
+        mesen_ramstate:
+          group: ADVANCED OPTIONS
+          prompt:      DEFAULT POWER ON RAM STATE
+          description: Useful for speedruns/glitches.
+          choices:
+            "All 0s (Default)": All 0s (Default)
+            "All 1s":           All 1s
+            "Random Values":    Random Values
+        mesen_overclock:
+          group: ADVANCED OPTIONS
+          prompt:      OVERCLOCK (UNSTABLE)
+          description: Enhancement. Reduces system slowdown. Causes issues in some games.
+          choices:
+            "None":      None
+            "Low":       Low
+            "Medium":    Medium
+            "High":      High
+            "Very High": Very High
+        mesen_overclock_type:
+          group: ADVANCED OPTIONS
+          prompt:      OVERCLOCK TYPE
+          description: Prefer "Before NMI", change to After NMI only if needed by the game.
+          choices:
+            "Before NMI": Before NMI (Recommended)
+            "After NMI":  After NMI
     citra:
       shared: [rewind, autosave]
     daphne:
@@ -1304,6 +1398,7 @@ libretro:
                             "Special 4 (TI-83 Legacy)":         Special 4 (TI-83 Legacy)
                             "TWB64 - Pack 1":                   TWB75 - WonderSwan
                             "TWB64 - Pack 2":                   TWB76 - Yellow Banana
+                            "Custom":                           custom
     genesisplusgx-wide:
       features: [netplay, cheevos]
       shared: [rewind, autosave]
@@ -1514,7 +1609,7 @@ libretro:
             sharemameart:
                 group: ADVANCED OPTIONS
                 prompt:      SHARE MAME ARTWORK
-                description: Use the same art paths as standalone MAME - not recommended if using decoarations or shaders.
+                description: Use the same art paths as standalone MAME - not recommended if using decorations or shaders.
                 choices:
                     "On (Default)": 1
                     "Off":          0
@@ -1598,7 +1693,7 @@ libretro:
             sharemameart:
                 group: ADVANCED OPTIONS
                 prompt:      SHARE MAME ARTWORK
-                description: Use the same art paths as standalone MAME - not recommended if using decoarations or shaders.
+                description: Use the same art paths as standalone MAME - not recommended if using decorations or shaders.
                 choices:
                     "On (Default)": 1
                     "Off":          0
@@ -2101,22 +2196,47 @@ libretro:
                       prompt:      MAC MODEL
                       description: Select model of Mac (Recommendations are Mac Plus for B&W, Mac LC 3 for Color)
                       choices:
-                          "Mac 128k (128kb RAM, 2 LD Floppies)":                       mac128k
-                          "Mac 512k (512kb RAM, 2 LD Floppies)":                       mac512k
-                          "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)":                     macplus
-                          "Mac SE (4Mb RAM, 2 LD Floppies/HDD)":                       macse
-                          "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)":                  macclasc
-                          "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":             mac2fdhd
-                          "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":            maciix
-                          "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)": maclc3
+                          "Mac 128k (128kb RAM, 2 LD Floppies)":                         mac128k
+                          "Mac 512k (512kb RAM, 2 LD Floppies)":                         mac512k
+                          "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)":                       macplus
+                          "Mac SE (4Mb RAM, 2 LD Floppies/HDD)":                         macse
+                          "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)":                    macclasc
+                          "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":               mac2fdhd
+                          "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD/Image Reader)": maciix
+                          "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)":   maclc3
+                  imagereader:
+                      group: ADVANCED OPTIONS
+                      prompt:      IMAGE READER
+                      description: Install the image reader card to read idks image files (Mac IIx only)
+                      choices:
+                          "Disabled":         disabled
+                          "Slot A (Default)": nba
+                          "Slot B":           nbb
+                          "Slot C":           nbc
+                          "Slot D":           nbd
+                          "Slot E":           nbe
+                  ramsize:
+                      group: ADVANCED OPTIONS
+                      prompt:      RAM SIZE
+                      description: How much RAM the emulated Mac will have installed (Mac IIx & Mac LC 3 only)
+                      choices:
+                          "2MB":    2
+                          "4MB":    4
+                          "8MB":    8
+                          "16MB":   16
+                          "32MB":   32
+                          "48MB":   48
+                          "64MB":   64
+                          "96MB":   96
+                          "128MB":  128
                   altromtype:
                       group: ADVANCED OPTIONS
                       prompt:      MEDIA TYPE
-                      description: Type of ROM file to load.
+                      description: Type of ROM file to load
                       choices:
-                          "Disk":       flop1
-                          "CD":         cdrm
-                          "Hard Drive": hard
+                          "Floppy Disk": flop1
+                          "CD":          cdrm
+                          "Hard Drive":  hard
                   bootdisk:
                       group: ADVANCED OPTIONS
                       prompt:      BOOT DISK
@@ -2152,6 +2272,29 @@ libretro:
                       choices:
                           "Don't Use (Default)":             none
                           "Creatronic Mega Duck cartridges": megaduck
+                  pergamecfg:
+                      group: ADVANCED OPTIONS
+                      prompt:      CUSTOM GAME CONFIG
+                      description: Enable per-game custom configuration via MAME menu.
+                      choices:
+                          "On":  1
+                          "Off": 0
+         pdp1:
+              cfeatures:
+                  softList:
+                      group: ADVANCED OPTIONS
+                      prompt:      SOFTWARE LIST
+                      description: Use MAME software lists to identify ROM
+                      choices:
+                          "Don't Use (Default)":            none
+                          "PDP-1 Paper Tape Reader Images": pdp1_ptp
+                  enableui:
+                      group: ADVANCED OPTIONS
+                      prompt:      UI KEYS
+                      description: Toggle with hotkey + D-pad up or Scroll Lock in-game.
+                      choices:
+                          "Off at Start": 0
+                          "On at Start":  1
                   pergamecfg:
                       group: ADVANCED OPTIONS
                       prompt:      CUSTOM GAME CONFIG
@@ -2407,7 +2550,7 @@ libretro:
             sharemameart:
                 group: ADVANCED OPTIONS
                 prompt:      SHARE MAME ARTWORK
-                description: Use the same art paths as standalone MAME - not recommended if using decoarations or shaders.
+                description: Use the same art paths as standalone MAME - not recommended if using decorations or shaders.
                 choices:
                     "On (Default)": 1
                     "Off":          0
@@ -2416,8 +2559,8 @@ libretro:
                 prompt:      CROP ARTWORK
                 description: Crop MAME artwork to maximize the game screen and only fill unused space.
                 choices:
-                    "On (Default)": 1
-                    "Off":          0
+                    "On":            1
+                    "Off (Default)": 0
             customcfg:
                 group: ADVANCED OPTIONS
                 prompt:      CUSTOM CONFIG
@@ -4798,8 +4941,11 @@ cemu:
         rumble:
             prompt:      RUMBLE
             choices:
-                "Off":                         0
-                "On":                          1
+                "Off (Default)":               0
+                "25%":                         0.25
+                "50%":                         0.5
+                "75%":                         0.75
+                "100%":                        1
         controller_combination:
             prompt:      CONTROLLER COMBINATION
             description: Pro Controller required for games that require shake motions.
@@ -4808,6 +4954,7 @@ cemu:
                 "GamePad + 4 Sideway Wiimote": 1
                 "5 Pro Controller":            2
                 "5 Sideway Wiimote":           3
+                "Wii U Classic Controller":    4
 
 citra:
   shared: [videomode, ratio, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
@@ -4860,7 +5007,7 @@ citra:
                 "On":                    1
         citra_custom_textures:
             group: ADVANCED OPTIONS
-            prompt:      CUSTOM TEXTURES
+            prompt:      LOAD CUSTOM TEXTURES
             description: Preloading is impossible from ES.
             choices:
                 "Off":                   0
@@ -5112,21 +5259,19 @@ dolphin:
                     "Wiimote Sideway + Nunchuk": in
 
 dolphin_triforce:
-  features: [decoration, padtokeyboard]
+  features: [decoration]
   shared: [hud]
   cfeatures:
         internal_resolution:
             prompt:      RENDERING RESOLUTION
             description: Enhancement. Increase the rendering resolution. Makes 3D objects clearer.
             choices:
-                "1x native (640x528)":  1
-                "2x 720p (1280x1056)":  2
-                "3x 1080p (1920x1584)": 3
-                "4x 1440p (2560x2112)": 4
-                "5x (3200x2640)":       5
-                "6x 4K (3840x3168)":    6
-                "7x (4480x3696)":       7
-                "8x 5K (5120x4224)":    8
+                "1x native (640x528)":    2
+                "1.5x 720p (960x792)":    3
+                "2x (1280x1056)":         4
+                "2.5x 1080p (1600x1320)": 5
+                "3x (1920x1584)":         6
+                "4x 1440p (2560x2112)":   7
         dolphin_aspect_ratio:
             prompt:      ASPECT RATIO
             description: The final output image, unrelated to the Wii's emulated NAND setting.
@@ -5134,33 +5279,22 @@ dolphin_triforce:
                 "Force 16:9": 1
                 "Force 4:3": 2
                 "Stretch to window": 3
-        ubershaders:
-            prompt:      UBERSHADERS (needs review)
-            description: May not work well on all hardware. Hybrid is preferred, where supported.
-            choices:
-                "No Ubershaders":                          no_ubershader
-                "Exclusive Ubershaders":                   exclusive_ubershader
-                "Hybrid Ubershaders":                      hybrid_ubershader
-                "Skip Drawing":                            skip_draw
-        wait_for_shaders:
-            prompt:      PRE-CACHE SHADERS
-            description: Compile shaders on next launch of game (one time). Reduces micro-freezes.
-            choices:
-                "Off (default)": 0
-                "On":            1
         perf_hacks:
+            group: ADVANCED OPTIONS
             prompt:      PERFORMANCE HACKS (needs review)
             description: Increase emulator performance, at the cost of accuracy/stability.
             choices:
                 "Off": 0
                 "On":  1
         use_pad_profiles:
+            group: ADVANCED OPTIONS
             prompt:      USE PAD PROFILES
             description: Search for custom configured joystick profiles.
             choices:
                 "Off": 0
                 "On":  1
         anisotropic_filtering:
+            group: ADVANCED OPTIONS
             prompt:      ANISOTROPIC FILTERING
             description: Improves clarity of distant textures.
             choices:
@@ -5170,56 +5304,69 @@ dolphin_triforce:
                 "8x":  3
                 "16x": 4
         dual_core:
-            prompt:      DUAL CORE MODE (needs review)
+            group: ADVANCED OPTIONS
+            prompt:      DUAL CORE MODE
             description: Usually not much faster than single core mode.
             choices:
                 "Off": 0
                 "On":  1
         gpu_sync:
-            prompt:      GPU SYNC (needs review)
+            group: ADVANCED OPTIONS
+            prompt:      GPU SYNC
             description: Speed hack for dual core mode to fix some glitches.
             choices:
                 "Off": 0
                 "On":  1
         antialiasing:
+            group: ADVANCED OPTIONS
             prompt:      ANTI-ALIASING
             description: Enhancement. Smooth out jagged edges on 3D object polygons.
             choices:
-                "Off": 0
-                "2x":  2
-                "4x":  4
-                "8x":  8
-        use_ssaa:
-            prompt:      ANTI-ALIASING MODE
-            description: Toggle MSAA/SSAA. Depends on anti-aliasing being enabled.
-            choices:
-                "MSAA (default)": 0
-                "SSAA":           1
+                "Off":         0
+                "2x":          1
+                "4x":          2
+                "8x":          3
+                "8x (CSAA)":   4
+                "8xQ (CSAA)":  5
+                "16x (CSAA)":  6
+                "16xQ (CSAA)": 7
+                "4x (SSAA)":   8
         hires_textures:
+            group: ADVANCED OPTIONS
             prompt:      LOAD CUSTOM TEXTURES
             choices:
                 "Off": 0
                 "On":  1
         widescreen_hack:
+            group: ADVANCED OPTIONS
             prompt:      WIDESCREEN HACK (GLITCHY)
             description: Enhancement. Only works with a 16/9 ratio and bezels disabled.
             choices:
                 "Off": 0
                 "On":  1
         enable_mmu:
+            group: ADVANCED OPTIONS
             prompt:      MEMORY MANAGEMENT UNIT
             description: Required by some games.
             choices:
                 "Off": 0
                 "On":  1
         vsync:
+            group: ADVANCED OPTIONS
             prompt:      VSYNC
             description: Fix screen tearing. CPU heavy.
             choices:
                 "Off": 0
                 "On":  1
+        disable_osd_messages:
+            group: ADVANCED OPTIONS
+            prompt:      DISABLE OSD MESSAGES
+            description: Disable status messages displayed by the emulator.
+            choices:
+                "Off": 0
+                "On":  1
         rumble:
-            prompt:      RUMBLE (needs review)
+            prompt:      RUMBLE
             choices:
                 "Off": 0
                 "On":  1
@@ -5546,9 +5693,157 @@ linapple:
 
 melonds:
   shared: [videomode, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
+  cfeatures:
+        melonds_framerate:
+            group: ADVANCED OPTIONS
+            prompt: LIMIT FRAMERATE
+            description: Choose whether or not to limit the framerate.
+            choices:
+                "No Limitation":      0
+                "Standard (Default)": 1
+        melonds_resolution:
+            prompt: RENDERING RESOLUTION
+            description: Enhancement. Increase the rendering resolution.
+            choices:
+                "1x native (256x192) (Default)": 1
+                "2x native (512x384)":           2
+                "3x native (768x576)":           3
+                "4x native (1024x768)":          4
+                "5x native (1280x960)":          5
+                "6x native (1536x1152)":         6
+                "7x native (1792x1344)":         7
+                "8x native (2048x1536)":         8
+                "9x native (2304x1728)":         9
+                "10x native (2560x1920)":        10
+                "11x native (2816x2112)":        11
+                "12x native (3072x2304)":        12
+                "13x native (3328x2496)":        13
+                "14x native (3584x2688)":        14
+                "15x native (3840x2880)":        15
+                "16x native (4096x3072)":        16
+        melonds_polygons:
+            group: ADVANCED OPTIONS
+            prompt: ENABLE POLYGON SPLITTING
+            description: Enables improved polygon splitting.
+            choices:
+                "Off (Default)": 0
+                "On":            1
+        melonds_rotation:
+            prompt: SCREEN ROTATION
+            description: Rotate the screen with the emulator.
+            choices:
+                "0 degrees (Default)": 0
+                "90 degrees":          1
+                "180 degrees":         2
+                "270 degrees":         3
+        melonds_screenswap:
+            prompt: SCREEN SWAP
+            description: Swap the Nintendo DS Displays.
+            choices:
+                "Off (Default)": 0
+                "On":            1
+        melonds_screensize:
+            prompt: SCREEN SIZE
+            description: Choose the screen size.
+            choices:
+                "1x (Default)": 0
+                "2x":           1
+                "3x":           2
+                "4x":           3
+        melonds_layout:
+            prompt: SCREEN LAYOUT
+            description: Choose the preferred screen layout.
+            choices:
+                "Natural (Default)": 0
+                "Vertical":          1
+                "Horizontal":        2
+                "Hybrid":            3
+        melonds_screensizing:
+            prompt: SCREEN SIZING
+            description: Choose the NDS screen sizings.
+            choices:
+                "Even (Default)":   0
+                "Emphasize top":    1
+                "Emphasize botton": 2
+                "Auto":             3
+                "Top only":         4
+                "Bottom only":      5
+        melonds_scaling:
+            prompt: INTEGER SCALING
+            description: Force integer scaling for pixels on larger displays.
+            choices:
+                "Off (Default)":   0
+                "On":              1
+        melonds_cheats:
+            prompt: ENABLE CHEATS
+            description: Enable cheats for MelonDS.
+            choices:
+                "Off (Default)":   0
+                "On":              1    
+        melonds_osd:
+            prompt: ENABLE OSD
+            description: Enable the on screen display.
+            choices:
+                "Off":          0
+                "On (Default)": 1
+        melonds_console:
+            prompt: CONSOLE TYPE
+            description: Choose console type.
+            choices:
+                "DS (default)":        0
+                "DSi (Experiemental)": 1
 
 moonlight:
   shared: [videomode, ratio, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
+  cfeatures:
+        moonlight_codec:
+            group: ADVANCED OPTIONS
+            prompt:      VIDEO STREAM CODEC
+            description: h265 (HEVC) is CPU heavy and increases latency, but is more bandwidth efficient.
+            choices:
+                "h264 (less latency)":                                 0
+                "h265 (HEVC) (higher quality at lower bitrates)":      1
+        moonlight_resolution:
+            prompt:      VIDEO STREAM RESOLUTION
+            choices:
+                "720p (1280x720)":       0
+                "1080p (1920x1080)":     1
+                "4K (3840x2160)":        2
+        moonlight_framerate:
+            prompt:      VIDEO STREAM FRAMERATE
+            choices:
+                "30FPS":                    0
+                "60FPS":                    1
+                "120FPS":                   2
+        moonlight_bitrate:
+            group: ADVANCED OPTIONS
+            prompt:      VIDEO STREAM BITRATE
+            description: Higher number for higher picture quality, but requires more bandwidth.
+            choices:
+                "5Mbps (good for 720p)":                  0
+                "10Mbps (good for 1080p 60FPS)":          1
+                "20Mbps (not supported by some routers)": 2
+                "50Mbps (highest quality available)":     3
+        moonlight_sops:
+            group: ADVANCED OPTIONS
+            prompt:      DYNAMICALLY CALCULATE OPTIMAL SETTINGS
+            description: Streaming Optimal Playable Settings, overrides other settings if enabled.
+            choices:
+                "on":                    0
+                "off":                   1
+        moonlight_quitapp:
+            prompt:      QUIT ON HOST
+            description: Close app on the remote host when quitting Moonlight.
+            choices:
+                "on":                    0
+                "off":                   1
+        moonlight_avdecoder:
+            group: ADVANCED OPTIONS
+            prompt:      PREFERRED AV DECODER
+            description: If screen is rotated by 90 degrees, select SDL.
+            choices:
+                "None":                  "none"
+                "SDL":                   "sdl"
 
 mupen64plus:
   shared: [videomode, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
@@ -5570,6 +5865,15 @@ mupen64plus:
                 "3":                    3
                 "4":                    4
                 "5":                    5
+        mupen64plus_AudioBuffer:
+            group: ADVANCED OPTIONS
+            prompt:      AUDIO BUFFER (SAMPLES)
+            description: Lower values reduce audio latency and improve performance, but can cause audio issues.
+            choices:
+                "Very High":     Very High 
+                "High":          High
+                "Medium":        Medium
+                "Low":           Low
         mupen64plus_Mipmapping:
             group: ADVANCED OPTIONS
             prompt:      TEXTURE MIP-MAPPING (BLUR)
@@ -5956,8 +6260,34 @@ rpcs3:
             prompt:      STRETCH TO DISPLAY AREA
             description: Distorts the output to fill the display fully.
             choices:
-                "Off":   0
-                "On":    1
+                "Off (Default)": False
+                "On":            True
+        depthbuffer:
+            group: ADVANCED OPTIONS
+            prompt: WRITE DEPTH BUFFER
+            description: Can Fix broken graphics in some games.
+            choices:
+                "Off (Default)": False
+                "On":            True
+        sputhreads:
+            group: ADVANCED OPTIONS
+            prompt: PREFERRED SPU THREADS
+            description: May help to fix choppy audio on weaker CPUs.
+            choices:
+                "0 (Default)": 0
+                "1":           1
+                "2":           2
+                "3":           3
+                "4":           4
+                "5":           5
+                "6":           6
+        colorbuffers:
+            group: ADVANCED OPTIONS
+            prompt: WRITE COLOUR BUFFERS
+            description: Enable this option if you get missing graphics or broken lighting ingame.
+            choices:
+                "Off (Default)": False
+                "On":            True
 
 scummvm:
   features: [padtokeyboard]
@@ -5989,11 +6319,11 @@ easyrpg:
                 "Baltic":                        1257
 
 redream:
-  shared: [videomode, hud]
+  shared: [videomode, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
   cfeatures:
       redreamResolution:
-          prompt:      GAME RESOLUTION
-          description: Choose your rendered resolution (Requires personal redream.key file).
+          prompt:      RENDERING RESOLUTION
+          description: Choose your render resolution (Requires personal redream.key file).
           choices:
               "640x480":            1
               "1280x960 (Default)": 2
@@ -6064,6 +6394,10 @@ redream:
 
 sdlpop:
   features: [padtokeyboard]
+  shared: [videomode, ratio, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
+
+superbroswar:
+  features: []
   shared: [videomode, ratio, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
 
 supermodel:
@@ -6700,22 +7034,48 @@ mame:
                     prompt:      MAC MODEL
                     description: Select model of Mac (Recommendations are Mac Plus for B&W, Mac LC 3 for Color)
                     choices:
-                        "Mac 128k (128kb RAM, 2 LD Floppies)":                       mac128k
-                        "Mac 512k (512kb RAM, 2 LD Floppies)":                       mac512k
-                        "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)":                     macplus
-                        "Mac SE (4Mb RAM, 2 LD Floppies/HDD)":                       macse
-                        "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)":                  macclasc
-                        "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":             mac2fdhd
-                        "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":            maciix
-                        "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)": maclc3
+                        "Mac 128k (128kb RAM, 2 LD Floppies)":                          mac128k
+                        "Mac 512k (512kb RAM, 2 LD Floppies)":                          mac512k
+                        "Mac Plus (4Mb RAM, 2 LD Floppies/HDD)":                        macplus
+                        "Mac SE (4Mb RAM, 2 LD Floppies/HDD)":                          macse
+                        "Mac Classic (4Mb RAM, 2 HD Floppies/HDD)":                     macclasc
+                        "Mac II (2Mb RAM, Color, 2 HD Floppies/CD/HDD)":                mac2fdhd
+                        "Mac IIx (2Mb RAM, Color, 2 HD Floppies/CD/HDD, Image Reader)": maciix
+                        "Mac LC 3 (Default) (4Mb RAM, Color, 2 HD Floppies/CD/HDD)":    maclc3
+                imagereader:
+                    group: ADVANCED OPTIONS
+                    prompt:      IMAGE READER
+                    description: Install the image reader card to read idks image files (Mac IIx only)
+                    choices:
+                        "Disabled":         disabled
+                        "Slot A (Default)": nba
+                        "Slot B":           nbb
+                        "Slot C":           nbc
+                        "Slot D":           nbd
+                        "Slot E":           nbe
+                ramsize:
+                    group: ADVANCED OPTIONS
+                    prompt:      RAM SIZE
+                    description: How much RAM the emulated Mac will have installed (Mac IIx & Mac LC 3 only)
+                    choices:
+                        "2MB":    2
+                        "4MB":    4
+                        "8MB":    8
+                        "16MB":   16
+                        "32MB":   32
+                        "48MB":   48
+                        "64MB":   64
+                        "96MB":   96
+                        "128MB":  128
                 altromtype:
                     group: ADVANCED OPTIONS
                     prompt:      MEDIA TYPE
-                    description: Type of ROM file to load.
+                    description: Type of ROM file to load. Disk Image requires Mac IIx and Image Reader
                     choices:
-                        "Disk":       flop1
-                        "CD":         cdrm
-                        "Hard Drive": hard
+                        "Floppy Disk": flop1
+                        "CD":          cdrm
+                        "Hard Drive":  hard
+                        "Disk Image":  disk
                 bootdisk:
                     group: ADVANCED OPTIONS
                     prompt:      BOOT DISK
@@ -6751,6 +7111,29 @@ mame:
                     choices:
                         "Don't Use (Default)":             none
                         "Creatronic Mega Duck cartridges": megaduck
+                pergamecfg:
+                    group: ADVANCED OPTIONS
+                    prompt:      CUSTOM GAME CONFIG
+                    description: Enable per-game custom configuration via MAME menu.
+                    choices:
+                        "On":  1
+                        "Off": 0
+       pdp1:
+            cfeatures:
+                softList:
+                    group: ADVANCED OPTIONS
+                    prompt:      SOFTWARE LIST
+                    description: Use MAME software lists to identify ROM
+                    choices:
+                        "Don't Use (Default)":            none
+                        "PDP-1 Paper Tape Reader Images": pdp1_ptp
+                enableui:
+                    group: ADVANCED OPTIONS
+                    prompt:      UI KEYS
+                    description: Toggle with hotkey + D-pad up or Scroll Lock in-game.
+                    choices:
+                        "Off at Start": 0
+                        "On at Start":  1
                 pergamecfg:
                     group: ADVANCED OPTIONS
                     prompt:      CUSTOM GAME CONFIG
@@ -7219,10 +7602,10 @@ xemu:
             prompt:      SCALING MODE
             description: Choose the scaling mode for the game screen.
             choices:
-                "Center":     center
-                "Scale":      scale
-                "Stretch":    stretch
-                "Widescreen": scale_ws169
+                "Original resolution": center
+                "Scale to best fit":   scale
+                "Stretch to full":     stretch
+                "Stretch to 16:9":     scale_ws169
         render:
             prompt:       RENDERING RESOLUTION
             choices:
@@ -7499,3 +7882,15 @@ demul:
             choices:
                 "Off": 0
                 "On":  1
+
+sh:
+  features: [padtokeyboard]
+  shared: [videomode, bezel, bezel_stretch, hud, bezel.tattoo, bezel.tattoo_corner, bezel.tattoo_file, bezel.resize_tattoo]
+
+xenia:
+  features: []
+  shared: [videomode]
+
+odcommander:
+  features: [padtokeyboard]
+  shared: [videomode]

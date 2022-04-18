@@ -246,11 +246,19 @@ class EsSystemConf:
             emulator_featuresTxt = f"''{system}.videomode''"
             # Safety check if the emulator even exists in features.yml
             if emulator in features:
+                # Check the "features" available to the emulator. These are what appear in the "global:" key near the start of es_features.yml
                 if "features" in features[emulator]:
                     for feature in features[emulator]["features"]:
                         if emulator_featuresTxt != "":
                             emulator_featuresTxt += ", "
                         emulator_featuresTxt += f"''{system}.{feature}''"
+                # Check the "shared" features available for the emulator. These are in general the global options available from the MAIN MENU -> GAME SETTINGS window.
+                if "shared" in features[emulator]:
+                    for shared_feature in features[emulator]["shared"]:
+                        if emulator_featuresTxt != "":
+                            emulator_featuresTxt += ", "
+                        emulator_featuresTxt += f"''{system}.{shared_feature}''"
+
                 # Since RetroArch is so prevalent, it's worth having a stock description of it.
                 if emulator == "libretro":
                     featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro: (core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
@@ -275,7 +283,7 @@ class EsSystemConf:
                 # Table header.
                 tableheader = "^ ES setting name ''batocera.conf_key'' ^ Description => ES option ''key_value'' ^\n"
                 # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
-                if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator]:
+                if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator] or "shared" in features[emulator]:
                     if "cfeatures" in features[emulator]:
                         # Insert text for the settings that apply to all cores of that emulator.
                         featuresTxt += tableheader
@@ -299,14 +307,26 @@ class EsSystemConf:
                             if core in features[emulator]["cores"]:
                                 # Subheader for the specific emulator/core.
                                 featuresTxt += f"== {emulator}: {core} configuration ==\n\n"
+                                # Set variable to neutral.
+                                has_standardized_features = 0
+                                # Grab all the shared features.
+                                if "shared" in features[emulator]["cores"][core]:
+                                    for shared_feature in features[emulator]["cores"][core]["shared"]:
+                                        if core_featuresTxt != "":
+                                            core_featuresTxt += ", "
+                                        core_featuresTxt += f"''{system}.{shared_feature}''"
+                                    has_standardized_features = 1
                                 # Grab all standardized features.
                                 if "features" in features[emulator]["cores"][core]:
                                     for feature in features[emulator]["cores"][core]["features"]:
                                         if core_featuresTxt != "":
                                             core_featuresTxt += ", "
-                                        core_featuresTxt += feature
-                                    if not features[emulator]["cores"][core]:
-                                        featuresTxt += f"Standardized features for this core: {core_featuresTxt}\n\n"
+                                        core_featuresTxt += f"''{system}.{feature}''"
+                                    has_standardized_features = 1
+                                # Test if we had any features or shared features.
+                                if has_standardized_features == 1:
+                                    featuresTxt += f"Standardized features for this core: {core_featuresTxt}\n\n"
+
                                 # Optimization to only execute the following if the core has custom features.
                                 if "cfeatures" in features[emulator]["cores"][core] or "systems" in features[emulator]["cores"][core]:
                                     # Create the feature table.
@@ -318,14 +338,24 @@ class EsSystemConf:
                                            featuresTxt += EsSystemConf.featureprinter("global", features[emulator]["cores"][core], cfeature)
                                     # Print out the custom features that only apply to particular systems.
                                     if "systems" in features[emulator]["cores"][core]:
+                                       # Set variable to neutral.
+                                       has_standardized_features = 0
                                        for system in features[emulator]["cores"][core]["systems"]:
                                            system_featuresTxt = ""
                                            featuresTxt += f"^ Settings specific to {system} ||"
+                                           if "shared" in features[emulator]["cores"][core]["systems"][system]:
+                                               for shared_feature in features[emulator]["cores"][core]["systems"][system]:
+                                                   if system_featuresTxt != "":
+                                                       system_featuresTxt += ", "
+                                                   system_featuresTxt += f"{shared_feature}."
+                                               has_standardized_features = 1
                                            if "features" in features[emulator]["cores"][core]["systems"][system]:
                                                for feature in features[emulator]["cores"][core]["systems"][system]["features"]:
                                                    if system_featuresTxt != "":
                                                        system_featuresTxt += ", "
                                                    system_featuresTxt += f"{feature}."
+                                               has_standardized_features = 1
+                                           if has_standardized_features == 1:
                                                featuresTxt += f" Standardized features: {system_featuresTxt} |"
                                            featuresTxt += f"\n"
                                            if "cfeatures" in features[emulator]["cores"][core]["systems"][system]:
@@ -344,6 +374,11 @@ class EsSystemConf:
                         #for system in features[emulator]["systems"]:
                         system_featuresTxt = ""
                         if system in features[emulator]["systems"]:
+                            if "shared" in features[emulator]["systems"][system]:
+                                for shared_feature in features[emulator]["system"][system]["features"]:
+                                    if system_featuresTxt != "":
+                                        system_featuresTxt += ", "
+                                    system_featuresTxt += f"{shared_feature}."
                             if "features" in features[emulator]["systems"][system]:
                                 for feature in features[emulator]["systems"][system]["features"]:
                                     if system_featuresTxt != "":
