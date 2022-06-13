@@ -294,13 +294,13 @@ class EsSystemConf:
                             featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
                         for cfeature in features[emulator]["cfeatures"]:
                             featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
-                        featuresTxt += "\n"
+                            #featuresTxt += "\n"
                     # In the case that the emulator contains a cores subdictionary:
                     if "cores" in features[emulator]:
                         # Loop through just the emulators that system supports.
                         for core in SystemSpecificEmulators[emulator]:
                             # Header for the unique core.
-                            featuresTxt += f"=== {emulator}: {core} ===\n\n"
+                            featuresTxt += f"\n=== {emulator}: {core} ===\n\n"
                             # Initialize temporary string.
                             core_featuresTxt = ""
                             # Safeguard for if the core doesn't have any features at all.
@@ -340,27 +340,28 @@ class EsSystemConf:
                                     if "systems" in features[emulator]["cores"][core]:
                                        # Set variable to neutral.
                                        has_standardized_features = 0
-                                       for system in features[emulator]["cores"][core]["systems"]:
-                                           system_featuresTxt = ""
-                                           featuresTxt += f"^ Settings specific to {system} ||"
-                                           if "shared" in features[emulator]["cores"][core]["systems"][system]:
-                                               for shared_feature in features[emulator]["cores"][core]["systems"][system]:
-                                                   if system_featuresTxt != "":
-                                                       system_featuresTxt += ", "
-                                                   system_featuresTxt += f"{shared_feature}."
-                                               has_standardized_features = 1
-                                           if "features" in features[emulator]["cores"][core]["systems"][system]:
-                                               for feature in features[emulator]["cores"][core]["systems"][system]["features"]:
-                                                   if system_featuresTxt != "":
-                                                       system_featuresTxt += ", "
-                                                   system_featuresTxt += f"{feature}."
-                                               has_standardized_features = 1
-                                           if has_standardized_features == 1:
-                                               featuresTxt += f" Standardized features: {system_featuresTxt} |"
-                                           featuresTxt += f"\n"
-                                           if "cfeatures" in features[emulator]["cores"][core]["systems"][system]:
-                                               for cfeature in features[emulator]["cores"][core]["systems"][system]["cfeatures"]:
-                                                   featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["cores"][core]["systems"][system], cfeature)
+                                       for specificsystem in features[emulator]["cores"][core]["systems"]:
+                                           if system == specificsystem:
+                                               system_featuresTxt = ""
+                                               featuresTxt += f"^ Settings specific to {specificsystem} ||"
+                                               if "shared" in features[emulator]["cores"][core]["systems"][specificsystem]:
+                                                   for shared_feature in features[emulator]["cores"][core]["systems"][specificsystem]:
+                                                       if system_featuresTxt != "":
+                                                           system_featuresTxt += ", "
+                                                       system_featuresTxt += f"{shared_feature}."
+                                                   has_standardized_features = 1
+                                               if "features" in features[emulator]["cores"][core]["systems"][specificsystem]:
+                                                   for feature in features[emulator]["cores"][core]["systems"][specificsystem]["features"]:
+                                                       if system_featuresTxt != "":
+                                                           system_featuresTxt += ", "
+                                                       system_featuresTxt += f"{feature}."
+                                                   has_standardized_features = 1
+                                               if has_standardized_features == 1:
+                                                   featuresTxt += f" Standardized features: {system_featuresTxt} |"
+                                               featuresTxt += f"\n"
+                                               if "cfeatures" in features[emulator]["cores"][core]["systems"][specificsystem]:
+                                                   for cfeature in features[emulator]["cores"][core]["systems"][specificsystem]["cfeatures"]:
+                                                       featuresTxt += EsSystemConf.featureprinter(specificsystem, features[emulator]["cores"][core]["systems"][specificsystem], cfeature)
                                     # Insert text after the table for system-specific to core options.
                                     featuresTxt += "\n"
                                 #else:
@@ -396,6 +397,7 @@ class EsSystemConf:
                                 for cfeature in features[emulator]["systems"][system]["cfeatures"]:
                                     # Call special function to list the feature and all its choices.
                                     featuresTxt += EsSystemConf.featureprinter(system, features[emulator]["systems"][system], cfeature)
+                            featuresTxt += "\n"
             else:
                 featuresTxt += "There are no configuration options available yet.\n\n"
                             # Insert text after the table for system-specific settings. Currently unused.
