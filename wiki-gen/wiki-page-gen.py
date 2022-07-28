@@ -261,7 +261,7 @@ class EsSystemConf:
 
                 # Since RetroArch is so prevalent, it's worth having a stock description of it.
                 if emulator == "libretro":
-                    featuresTxt += "==== RetroArch ====\n\n[[https://docs.libretro.com/|RetroArch]] (formerly SSNES), is a ubiquitous frontend that can run multiple \"cores\", which are essentially the emulators themselves. The most common cores use the [[https://www.libretro.com/|libretro]] API, so that's why cores run in RetroArch in Batocera are referred to as \"libretro: (core name)\". RetroArch aims to unify the feature set of all libretro cores and offer a universal, familiar interface independent of platform.\n\n"
+                    featuresTxt += "==== RetroArch ====\n\nRetroArch has [[emulators:retroarch|its own page]].\n\n"
                 # Same for MAME.
                 elif emulator == "mame":
                     featuresTxt += "==== MAME ====\n\n[[https://www.mamedev.org/|MAME]], the Multiple Arcade Machine Emulator, is a multi-purpose emulation framework which facilitates the emulation of vintage hardware and software. Originally targeting vintage arcade machines, MAME has since absorbed the sister-project [[http://mess.redump.net/start|MESS]] (Multi Emulator Super System) to support a wide variety of vintage computers, video game consoles and calculators as well. MAME doesn't use an individual \"core\" for each system like RetroArch does, instead the ROM itself usually contains the necessary information to accurately emulate it, thus making it specific to the version of MAME it was made for. Overall it's a very complicated subject, we have a [[:arcade|guide specific to arcade]] just for it.\n\n"
@@ -270,9 +270,7 @@ class EsSystemConf:
 
                 # Special exceptions for special emulators.
                 if emulator == "libretro":
-                    featuresTxt += "=== RetroArch configuration ===\n\n"
-                    featuresTxt += "RetroArch offers a **Quick Menu** accessed by pressing ''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} which can be used to alter various things like [[:advanced_retroarch_settings|RetroArch and core options]], and [[:remapping_controls_per_emulator|controller mapping]]. Most RetroArch related settings can be altered from Batocera's EmulationStation.\n\n"
-                    featuresTxt += f"Standardized features available to all libretro cores: {emulator_featuresTxt}\n\n"
+                    featuresTxt += ""
                 elif emulator == "mame":
                     featuresTxt += "=== MAME configuration ===\n\n"
                     featuresTxt += "MAME offers a **[[https://docs.mamedev.org/usingmame/ui.html|Menu]]** in-game (''[HOTKEY]'' + {{:wiki:south.png?nolink&20|South button (B SNES)}} or ''[Tab]'' on the keyboard). This can be used to manually adjust inputs or game settings. If you're having issues with a specific game, check the [[https://wiki.mamedev.org/index.php/FAQ:Games|MAMEdev FAQ for that game here.]] For MESS systems specifically, you might find more information on [[http://mess.redump.net/start|MESS's wiki]]. All options can also be edited by opening the ''mame.ini'' file.\n\n"
@@ -285,16 +283,17 @@ class EsSystemConf:
                 # Optimization to only execute the following if there is at least one of these subdictionaries in the emulator dictionary.
                 if "cores" in features[emulator] or "systems" in features[emulator] or "cfeatures" in features[emulator] or "shared" in features[emulator]:
                     if "cfeatures" in features[emulator]:
-                        # Insert text for the settings that apply to all cores of that emulator.
-                        featuresTxt += tableheader
-                        # Exceptions for known emulators that don't use cores.
-                        if emulator == "mame":
-                            featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
-                        else:
-                            featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
-                        for cfeature in features[emulator]["cfeatures"]:
-                            featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
-                            #featuresTxt += "\n"
+                        if emulator != "libretro":
+                            # Insert text for the settings that apply to all cores of that emulator.
+                            featuresTxt += tableheader
+                            # Exceptions for known emulators that don't use cores.
+                            if emulator == "mame":
+                                featuresTxt += "^ Settings that apply to all versions of this emulator ||\n"
+                            else:
+                                featuresTxt += "^ Settings that apply to all cores of this emulator ||\n"
+                            for cfeature in features[emulator]["cfeatures"]:
+                                featuresTxt += EsSystemConf.featureprinter(system, features[emulator], cfeature)
+                                #featuresTxt += "\n"
                     # In the case that the emulator contains a cores subdictionary:
                     if "cores" in features[emulator]:
                         # Loop through just the emulators that system supports.
@@ -358,15 +357,15 @@ class EsSystemConf:
                                                    has_standardized_features = 1
                                                if has_standardized_features == 1:
                                                    featuresTxt += f" Standardized features: {system_featuresTxt} |"
-                                               featuresTxt += f"\n"
+                                               featuresTxt += "\n"
                                                if "cfeatures" in features[emulator]["cores"][core]["systems"][specificsystem]:
                                                    for cfeature in features[emulator]["cores"][core]["systems"][specificsystem]["cfeatures"]:
                                                        featuresTxt += EsSystemConf.featureprinter(specificsystem, features[emulator]["cores"][core]["systems"][specificsystem], cfeature)
-                                    # Insert text after the table for system-specific to core options.
-                                    featuresTxt += "\n"
                                 #else:
                                     # Text before the table only when there's no custom or system subdictionaries for the core. Currently unused.
                                     #featuresTxt += "uniquetext {} somemoreuniquetext {} whatami\n".format(core, core_featuresTxt)
+                        # Insert text after the table for system-specific to core options.
+                        featuresTxt += "\n"
                     # For system subdictionaries in the feature list:
                     if "systems" in features[emulator]:
                         # Insert text before the table. Currently unused.
@@ -405,7 +404,7 @@ class EsSystemConf:
                     #featuresTxt += "\n"
                 #else:
                     #featuresTxt += "\n"
-        #featuresTxt += "\n"
+        featuresTxt += "\n"
 
         return featuresTxt
 
