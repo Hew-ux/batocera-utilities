@@ -19,7 +19,7 @@ Just run `python3 wiki-gen.py <system shortname>` to generate a page for that sy
 
 ```python3 wiki-gen.py psx```
 
-By default, the latest `es_systems.yml`, `es_features.yml` and `batocera-systems` files are downloaded from the repository, so please don't spam it or automate it frequently. If you'd like to use a local copy of those files, you can utilise the optional '-ls`, `-lf` and `-b` flags for the `es_systems.yml`, `es_features.yml` and `batocera-systems` files respectively. If instead you'd like to manually define your `es_systems.yml` and `es_features.yml` file, use the `-s` and `-f` flags instead. I've included a sample es_features and es_systems file to test with, based on the equivalent files at https://github.com/batocera-linux/batocera.linux/tree/master/package/batocera/emulationstation/batocera-es-system
+By default, the latest `es_systems.yml`, `es_features.yml` and `batocera-systems` files are downloaded from the repository, so please don't spam it or automate it frequently. If you'd like to use a local copy of those files, you can utilise the optional `-ls`, `-lf` and `-b` flags for the `es_systems.yml`, `es_features.yml` and `batocera-systems` files respectively. If instead you'd like to manually define your `es_systems.yml` and `es_features.yml` file, use the `-s` and `-f` flags instead. I've included a sample es_features and es_systems file to test with, based on the equivalent files at https://github.com/batocera-linux/batocera.linux/tree/master/package/batocera/emulationstation/batocera-es-system
 
 For further syntax help, the program's usage documentation can be summoned with the `-h` flag. Here's a static copy of that output:
 
